@@ -1,40 +1,35 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import type { ComponentType } from 'react'
 import { SITE_NAME, SITE_DOMAIN, SITE_TAGLINE, BUSINESS } from '@/lib/config'
-import {
-  Mail, XLogo, Trophy, Clock, Grid, Calendar, BarChart, Info, Scale, HelpCircle, Flag, Building,
-  FileText, Shield, RotateCcw,
-} from './icons'
+import { Mail, XLogo } from './icons'
 
-type Mark = ComponentType<{ size?: number }>
-const COLS: { title: string; links: [string, string, Mark][] }[] = [
+const COLS: { title: string; links: [string, string][] }[] = [
   {
     title: 'Board',
     links: [
-      ['/', 'Leaderboard', Trophy],
-      ['/?scope=today', 'Today', Clock],
-      ['/categories', 'Categories', Grid],
-      ['/daily', 'Daily archive', Calendar],
-      ['/stats', 'Live stats', BarChart],
+      ['/', 'Leaderboard'],
+      ['/?scope=today', 'Today'],
+      ['/categories', 'Categories'],
+      ['/daily', 'Daily archive'],
+      ['/stats', 'Live stats'],
     ],
   },
   {
     title: 'Company',
     links: [
-      ['/about', 'About', Info],
-      ['/rules', 'Rules', Scale],
-      ['/faq', 'FAQ', HelpCircle],
-      ['/report', 'Report a listing', Flag],
-      ['/imprint', 'Imprint', Building],
+      ['/about', 'About'],
+      ['/rules', 'Rules'],
+      ['/faq', 'FAQ'],
+      ['/report', 'Report a listing'],
+      ['/imprint', 'Imprint'],
     ],
   },
   {
     title: 'Legal',
     links: [
-      ['/terms', 'Terms', FileText],
-      ['/privacy', 'Privacy', Shield],
-      ['/refunds', 'Refunds', RotateCcw],
+      ['/terms', 'Terms'],
+      ['/privacy', 'Privacy'],
+      ['/refunds', 'Refunds'],
     ],
   },
 ]
@@ -57,9 +52,7 @@ export default function Footer() {
         {COLS.map((c) => (
           <div key={c.title} className="foot-col">
             <h4>{c.title}</h4>
-            {c.links.map(([href, label, Mark]) => (
-              <Link key={href} href={href}><Mark size={14} /> {label}</Link>
-            ))}
+            {c.links.map(([href, label]) => <Link key={href} href={href}>{label}</Link>)}
           </div>
         ))}
       </div>

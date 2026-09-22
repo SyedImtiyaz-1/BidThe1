@@ -969,17 +969,16 @@ dialog[open] { opacity: 1; transform: none; transition: opacity .16s ease, trans
 
 /* --- marks on the text line ----------------------------------------------- */
 
-.nav-links a, .menu-panel a, .foot-col a, .foot-contact a, .crumbs a,
+.menu-panel a, .foot-contact a, .crumbs a,
 .hot-name, .cat-board h2 a, .stand-k, .details, .rail-title {
   display: inline-flex; align-items: center; gap: 6px;
 }
 .menu-panel a { display: flex; gap: 10px; }
-.foot-col a { display: flex; gap: 8px; }
 .foot-brand .foot-contact { display: flex; flex-wrap: wrap; gap: 6px 16px; }
-.nav-links a svg, .menu-panel a svg, .hot-name svg, .cat-board h2 a svg, .stand-k svg,
+.menu-panel a svg, .hot-name svg, .cat-board h2 a svg, .stand-k svg,
 .crumbs a svg, .pill-stat svg, .rail-title svg { color: var(--accent-ink); flex: 0 0 auto; }
-.foot-col a svg, .foot-contact a svg { color: var(--ink-3); flex: 0 0 auto; }
-.foot-col a:hover svg, .foot-contact a:hover svg { color: var(--accent-ink); }
+.foot-contact a svg { color: var(--ink-3); flex: 0 0 auto; }
+.foot-contact a:hover svg { color: var(--accent-ink); }
 .details svg { transition: transform .15s ease; }
 .details:hover svg { transform: translateX(2px); }
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
