@@ -41,7 +41,12 @@ export default function Analytics() {
   }, [])
 
   useEffect(() => {
-    if (!KEY || !posthog.__loaded) return
+    if (!KEY) return
+    // No __loaded guard. init() above runs in an earlier effect of the same
+    // commit but finishes resolving remote config later, and gating on that
+    // flag dropped the first pageview and never retried it, because the
+    // dependencies had not changed. posthog buffers calls made before it is
+    // ready, so calling straight through is both simpler and correct.
     const qs = params?.toString()
     posthog.capture('$pageview', { $current_url: window.location.href, path: pathname, query: qs || undefined })
   }, [pathname, params])
