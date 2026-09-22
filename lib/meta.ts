@@ -269,13 +269,18 @@ export async function fetchMeta(input: string): Promise<Meta | null> {
     })
     if (!res.ok) return fallback
 
-    // Cap the body. Some pages are megabytes and none of it is in <head>.
+    // Cap the body, then stop at </head>, which on an ordinary site arrives
+    // within a few KB. The ceiling has to clear the worst case though: the
+    // Play Store buries its og tags at byte 948,000 of a 1.2MB head, and at
+    // 120KB we never reached them, so every Play Store listing came out titled
+    // "play.google.com" with a generic favicon. The whole page downloads in
+    // under half a second and is read once per listing, not once per view.
     const reader = res.body?.getReader()
     let html = ''
     if (reader) {
       const decoder = new TextDecoder()
       let read = 0
-      while (read < 120_000) {
+      while (read < 1_400_000) {
         const { done, value } = await reader.read()
         if (done) break
         read += value.byteLength
@@ -297,6 +302,11 @@ export async function fetchMeta(input: string): Promise<Meta | null> {
     // A store URL is already definitive; otherwise let the page say.
     const kind = listingKind(u) === 'app' ? 'app' : kindFromHtml(html) ?? 'website'
 
+    // On a store page og:image is the app's own icon, which is square and
+    // exactly what the board wants. Everywhere else it is a wide social card,
+    // so the favicon stays the better choice.
+    const ogImage = isAppStoreUrl(u) ? metaTag(html, 'og:image') : null
+
     return {
       url: u.toString(),
       key: listingKey(u),
@@ -304,7 +314,7 @@ export async function fetchMeta(input: string): Promise<Meta | null> {
       host,
       title: handleTitle(u) ?? cleanTitle(title, host),
       tagline: tagline.slice(0, 180),
-      iconUrl: faviconUrl(host),
+      iconUrl: ogImage ?? faviconUrl(host),
     }
   } catch {
     return fallback
