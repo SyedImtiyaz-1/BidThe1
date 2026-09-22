@@ -1,10 +1,11 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { cache } from 'react'
 import type { Metadata } from 'next'
 import Money from '@/components/Money'
 import CopyLink from '@/components/CopyLink'
 import CategoryIcon from '@/components/CategoryIcon'
-import { getListingDetail } from '@/lib/rank'
+import { getListingDetail as loadDetail } from '@/lib/rank'
 import { getRates } from '@/lib/fx'
 import { getDisplayCurrency } from '@/lib/session'
 import { convertFromBase, formatMoney, unitsToBeat, unitMinor } from '@/lib/money'
@@ -14,6 +15,10 @@ import { ago } from '@/lib/time'
 export const dynamic = 'force-dynamic'
 
 const LABEL = new Map<string, string>(CATEGORIES.map((c) => [c.slug, c.label]))
+
+// generateMetadata and the page both need the detail. React's cache dedupes
+// the two calls within one request, so the three queries run once, not twice.
+const getListingDetail = cache(loadDetail)
 const n = (v: number) => v.toLocaleString('en-US')
 
 type Params = { params: Promise<{ slug: string }> }
