@@ -11,14 +11,17 @@ export const BASE_MINOR_DIGITS = 2
 export const STEP_MINOR = 100
 
 /**
- * Floor for any single payment. Not $1: the processor takes a percentage plus
- * a fixed fee, and on a dollar the fee is most of the dollar. topapp.lol used
- * a $1 floor and collected 23 dead listings tied at the bottom of the board.
+ * Floor for any single payment.
+ *
+ * A dollar keeps the entry price as low as it can go, which is the point. The
+ * processor's fixed fee eats most of a one dollar payment, so the floor is a
+ * way in rather than a source of margin; the money is in the listings that
+ * climb past it.
  */
-export const MIN_PAYMENT_MINOR = 500
+export const MIN_PAYMENT_MINOR = 100
 
 /** What a brand new listing must pay to appear at all. */
-export const MIN_FIRST_PAYMENT_MINOR = 500
+export const MIN_FIRST_PAYMENT_MINOR = 100
 
 /** Ceiling on a single payment, so a typo cannot become a $500,000 charge. */
 export const MAX_PAYMENT_MINOR = 5_000_000

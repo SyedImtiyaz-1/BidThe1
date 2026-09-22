@@ -37,7 +37,7 @@ Copy `.env.example` to `.env.local`. Every value is optional in development.
 ## How the money works
 
 One currency, everywhere. Amounts are integer cents in `amount_minor`, the step between
-positions is $1 and the minimum payment is $5. What is displayed, what ranks and what is
+positions is $1 and the minimum payment is $1. What is displayed, what ranks and what is
 charged are the same number, so there is no conversion layer to keep honest.
 
 Rank is never stored. It is `row_number() over (order by total_minor desc, first_reached_at asc)`
