@@ -79,14 +79,19 @@ export default function Board({
               <img className="ico" src={`/icon/${r.slug}`} alt="" loading="lazy" width={40} height={40} />
 
               <div className="row-main">
-                <a
-                  className="row-title"
-                  href={`/go/${r.slug}`}
-                  rel="sponsored nofollow noopener"
-                  target="_blank"
-                >
-                  {r.title}
-                </a>
+                <div className="row-head">
+                  <a
+                    className="row-title"
+                    href={`/go/${r.slug}`}
+                    rel="sponsored nofollow noopener"
+                    target="_blank"
+                  >
+                    {r.title}
+                  </a>
+                  <span className="row-money">
+                    <Money minor={convertFromBase(shown, currency, rate)} currency={currency} />
+                  </span>
+                </div>
                 {r.tagline && <div className="row-tag">{r.tagline}</div>}
                 <div className="row-meta">
                   <Link href={`/?category=${r.category}`}>
@@ -113,10 +118,6 @@ export default function Board({
                     </>
                   )}
                 </div>
-              </div>
-
-              <div className="row-money">
-                <Money minor={convertFromBase(shown, currency, rate)} currency={currency} />
               </div>
             </li>
           )

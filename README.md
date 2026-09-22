@@ -71,8 +71,12 @@ a rank by roughly 85 times.
 - [ ] Dodo Payments account approved, and a one-time product created with Pay What You Want
       enabled. Put its id in `DODO_PRODUCT_ID`. The server sets the amount on every checkout,
       so the buyer never picks their own price.
-- [ ] Webhook endpoint registered at `/api/webhooks/dodo` with the signing secret in
-      `DODO_WEBHOOK_SECRET`. The secret is per endpoint and lives in Dodo, so copy it from
+- [ ] Webhook endpoint registered at `/api/webhooks/dodo` **on the primary host** with the
+      signing secret in `DODO_WEBHOOK_SECRET`. Vercel serves one domain and 308-redirects the
+      others (today `coolapp.lol` redirects to `www.coolapp.lol`), and webhook senders do not
+      follow redirects, so an endpoint on the wrong host fails every delivery with a 308 that
+      looks like a success from the dashboard's "sent" column. Check with an unsigned POST:
+      the right host answers `400`, the wrong one `308`. The secret is per endpoint and lives in Dodo, so copy it from
       there (`GET /webhooks/{id}/secret`, or the dashboard); a made-up value means every
       delivery is answered `400 bad signature` and nothing is ever credited. Subscribe to
       `payment.succeeded`, the refund events and the dispute events. Without the refund and
