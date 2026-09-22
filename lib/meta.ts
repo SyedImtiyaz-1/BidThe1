@@ -14,10 +14,69 @@ export type Meta = {
 
 export type ListingKind = 'website' | 'app'
 
-/** App stores are apps. Everything else, including an X profile, is a website. */
-export function listingKind(u: URL): ListingKind {
+/**
+ * Hosts where the page is, by definition, an app listing.
+ *
+ * itunes.apple.com is the old Apple domain and still in circulation.
+ * TestFlight is a build of an app, which is close enough for a filter.
+ */
+const APP_STORE_HOSTS = new Set([
+  'apps.apple.com',
+  'itunes.apple.com',
+  'testflight.apple.com',
+  'play.google.com',
+  'apps.microsoft.com',
+  'microsoft.com',
+  'f-droid.org',
+  'galaxystore.samsung.com',
+  'appgallery.huawei.com',
+  'apkpure.com',
+  'setapp.com',
+])
+
+/** True when the URL is a store page for an app. */
+export function isAppStoreUrl(u: URL): boolean {
   const host = u.hostname.replace(/^www\./, '')
-  return host === 'apps.apple.com' || host === 'play.google.com' ? 'app' : 'website'
+  if (host === 'microsoft.com') return u.pathname.startsWith('/store/apps')
+  return APP_STORE_HOSTS.has(host)
+}
+
+/**
+ * What sort of thing a URL points at, before the page has been read.
+ *
+ * A store link is an app. Everything else starts as a website, because most
+ * apps are submitted by their own marketing site and the host alone cannot
+ * tell those from anything else. `kindFromHtml` refines this once the page is
+ * in hand, and the submitter can override both.
+ */
+export function listingKind(u: URL): ListingKind {
+  return isAppStoreUrl(u) ? 'app' : 'website'
+}
+
+/**
+ * The page's own declaration that it has an app behind it.
+ *
+ * Apple's Smart App Banner and Facebook's App Links are the two conventions
+ * that stuck, and a product with an app almost always ships one or the other
+ * so that phones deep-link into it. That makes them a far better signal than
+ * the domain: raycast.com is a Mac app whose URL says nothing of the sort.
+ */
+export function kindFromHtml(html: string): ListingKind | null {
+  for (const tag of [
+    'apple-itunes-app',
+    'al:ios:app_store_id',
+    'al:ios:url',
+    'al:android:package',
+    'al:android:url',
+    'google-play-app',
+  ]) {
+    if (metaTag(html, tag)) return 'app'
+  }
+  // A store link in the page body is weaker than a meta tag but still clear.
+  if (/https?:\/\/(?:apps\.apple\.com\/[^"'\s]*\/id\d|play\.google\.com\/store\/apps\/details)/i.test(html)) {
+    return 'app'
+  }
+  return null
 }
 
 export function normalizeUrl(input: string): URL | null {
@@ -235,10 +294,13 @@ export async function fetchMeta(input: string): Promise<Meta | null> {
     const tagline =
       metaTag(html, 'og:description') || metaTag(html, 'description') || ''
 
+    // A store URL is already definitive; otherwise let the page say.
+    const kind = listingKind(u) === 'app' ? 'app' : kindFromHtml(html) ?? 'website'
+
     return {
       url: u.toString(),
       key: listingKey(u),
-      kind: listingKind(u),
+      kind,
       host,
       title: handleTitle(u) ?? cleanTitle(title, host),
       tagline: tagline.slice(0, 180),

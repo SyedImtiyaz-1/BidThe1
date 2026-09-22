@@ -12,6 +12,7 @@ export async function POST(req: Request) {
   const body = (await req.json().catch(() => ({}))) as {
     url?: string
     category?: string
+    kind?: string
     amountMinor?: number
   }
 
@@ -41,6 +42,10 @@ export async function POST(req: Request) {
   }
   const category = body.category!
 
+  // Detection is a default, not a verdict. Whoever is paying knows whether
+  // they are selling an app, so their answer wins when they give one.
+  const kind = body.kind === 'app' || body.kind === 'website' ? body.kind : meta.kind
+
   // One listing per product. The key is the host for an ordinary site, but
   // carries a path segment for platforms like x.com and apps.apple.com, where
   // the host alone would merge every product on the platform into one row.
@@ -65,7 +70,7 @@ export async function POST(req: Request) {
        values ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'pending')
        on conflict (listing_key) do update set url = listings.url
        returning *`,
-      [meta.key, slug, meta.url, meta.host, meta.title, meta.tagline, meta.iconUrl, category, meta.kind],
+      [meta.key, slug, meta.url, meta.host, meta.title, meta.tagline, meta.iconUrl, category, kind],
     )
   }
 

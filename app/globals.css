@@ -367,6 +367,37 @@ button, input, select { font: inherit; color: inherit; }
   max-width: 900px;
 }
 
+/* Two segments, the same height as the inputs beside them, so the claim row
+   still reads as one strip of controls. */
+.kind-pick {
+  display: inline-flex;
+  flex: 0 0 auto;
+  height: 48px;
+  padding: 4px;
+  gap: 2px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  background: var(--paper);
+}
+.kind-pick button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--ink-2);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.kind-pick button svg { color: var(--accent-ink); }
+.kind-pick button:hover { color: var(--ink); }
+.kind-pick button.on { background: var(--accent); color: var(--accent-on); }
+.kind-pick button.on svg { color: inherit; }
+
 .input, .select {
   height: 48px;
   border: 1px solid var(--line);
@@ -972,6 +1003,7 @@ dialog[open] { opacity: 1; transform: none; transition: opacity .16s ease, trans
   .claim-row { flex-wrap: wrap; gap: 10px; }
   .input { flex: 1 1 100%; height: 48px; }
   .select { flex: 1 1 140px; height: 48px; }
+  .kind-pick { flex: 1 1 100%; justify-content: center; }
   .btn { flex: 1 1 140px; height: 48px; padding: 0 20px; }
   .row { grid-template-columns: 30px 44px minmax(0, 1fr); column-gap: 12px; padding: 12px; }
   .row-main { grid-column: 3; }
