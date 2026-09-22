@@ -332,6 +332,10 @@ button, input, select { font: inherit; color: inherit; }
   margin-right: .04em;
 }
 .head-cat { white-space: nowrap; }
+.head-text { text-wrap: balance; }
+/* One flex child, so a wrap puts the whole price on the next line rather than
+   splitting the steppers off the number they step. */
+.head-amount { display: inline-flex; align-items: center; gap: 12px; flex: 0 0 auto; }
 .head-line > span:first-child { letter-spacing: -.02em; word-spacing: .04em; }
 
 .step-btn {

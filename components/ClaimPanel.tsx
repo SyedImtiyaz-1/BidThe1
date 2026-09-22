@@ -243,11 +243,15 @@ export default function ClaimPanel({
     <div id="claim">
       <div className="hero">
         <h1 className="head-line display">
-          <span>
+          <span className="head-text">
             Claim #{heroRank}
             {category && <> in <span className="head-cat">{LABEL.get(category)}</span></>}
             {' '}for
           </span>
+          {/* The steppers and the price are one unit. As four separate flex
+              children they broke apart on a narrow screen, leaving the minus
+              button stranded at the end of the sentence. */}
+          <span className="head-amount">
           <button
             className="step-btn"
             aria-label="Lower the amount"
@@ -289,6 +293,7 @@ export default function ClaimPanel({
             aria-label="Raise the amount"
             onClick={() => set(units + 1)}
           ><Plus /></button>
+          </span>
         </h1>
 
         <div className="claim-row">
