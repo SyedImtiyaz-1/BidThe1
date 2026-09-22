@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { SITE_NAME } from '@/lib/config'
 import { getStats } from '@/lib/rank'
 import { getDisplayCurrency } from '@/lib/session'
@@ -12,7 +13,7 @@ export default async function Nav() {
     <nav className="nav">
       <div className="wrap nav-in">
         <Link href="/" className="wordmark">
-          <span className="mark" />
+          <Image src="/logo.png" alt="" width={26} height={26} className="mark" priority />
           {SITE_NAME}<span className="dotlol">.lol</span>
         </Link>
 

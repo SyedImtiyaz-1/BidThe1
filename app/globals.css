@@ -125,9 +125,8 @@ button, input, select { font: inherit; color: inherit; }
 }
 .wordmark .mark {
   margin-right: 9px;
-  width: 22px; height: 22px;
-  border-radius: 7px;
-  background: var(--accent);
+  width: 26px;
+  height: 26px;
   display: inline-block;
 }
 .wordmark .dotlol { color: var(--accent); }
@@ -314,6 +313,7 @@ button, input, select { font: inherit; color: inherit; }
 .step-btn:active { transform: translateY(1px); }
 
 .step-note { margin: 14px 0 0; font-size: 14px; color: var(--ink-3); }
+.charge-note { margin-top: 5px; }
 
 .claim-row {
   display: flex;
@@ -477,10 +477,15 @@ button, input, select { font: inherit; color: inherit; }
   color: var(--accent-on);
   font-size: 12.5px;
   font-weight: 600;
-  padding: 3px 12px;
+  padding: 4px 13px;
   border-radius: var(--r-pill);
   border: 0;
   cursor: pointer;
+  /* Only the hovered row shows one, so overlapping the card above is safe and
+     keeps the badge visually attached to the row it prices. */
+  z-index: 2;
+  white-space: nowrap;
+  box-shadow: var(--shadow-1);
 }
 .row .claim-tab .money { font-size: 12.5px; font-weight: 600; color: inherit; }
 .row .claim-tab .money .sym { font-size: .85em; color: inherit; opacity: .8; }
@@ -492,9 +497,10 @@ button, input, select { font: inherit; color: inherit; }
 .row:hover .claim-tab,
 .row:focus-within .claim-tab { opacity: 1; pointer-events: auto; }
 
+/* No hover on a touch screen, so show it only on the top row there rather than
+   stacking a badge on every card. */
 @media (hover: none) {
-  .claim-tab { opacity: 1; pointer-events: auto; }
-  .row.has-tab { margin-top: 8px; }
+  .row:first-child .claim-tab { opacity: 1; pointer-events: auto; }
 }
 
 .empty { padding: 48px 0; color: var(--ink-2); text-align: center; }

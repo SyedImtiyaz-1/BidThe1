@@ -2,7 +2,8 @@ import Link from 'next/link'
 import Money from './Money'
 import type { BoardRow } from '@/lib/rank'
 import { convertFromBase } from '@/lib/money'
-import { BASE_CURRENCY, CATEGORIES } from '@/lib/config'
+import { BASE_CURRENCY, CATEGORIES, STEP_MINOR, MIN_FIRST_PAYMENT_MINOR } from '@/lib/config'
+import ClaimTab from './ClaimTab'
 import type { Rates } from '@/lib/fx'
 
 const CATEGORY_LABEL = new Map<string, string>(CATEGORIES.map((c) => [c.slug, c.label]))
@@ -33,7 +34,6 @@ export default function Board({
   justClaimed?: string
 }) {
   const rate = rates[currency] ?? 1
-  const converted = currency !== BASE_CURRENCY
 
   if (rows.length === 0) {
     return <p className="empty">Nothing here yet. Be the first.</p>
@@ -54,21 +54,25 @@ export default function Board({
         {rows.map((r) => {
           const shown = scope === 'all' ? r.total_minor : r.today_minor
           const podium = r.rank <= 3
-          const hasTab = r.rank === 1 && scope === 'all'
+
+          // Ties lose, so taking a rank means exceeding what that listing
+          // holds, not matching it. One step above is the cheapest amount that
+          // does it.
+          const takeThisRank = Math.max(MIN_FIRST_PAYMENT_MINOR, shown + STEP_MINOR)
           return (
             <li
               key={r.id}
               className={
-                `row${podium ? ' podium' : ''}${hasTab ? ' has-tab' : ''}` +
+                `row${podium ? ' podium' : ''}` +
                 (justClaimed === r.slug ? ' just-claimed' : '')
               }
               style={{ viewTransitionName: `row-${r.slug}` }}
             >
-              {hasTab && (
-                <a href="#claim" className="claim-tab num">
-                  Claim this rank for <Money minor={convertFromBase(nextPrice, currency, rate, 'ceil')} currency={currency} />
-                </a>
-              )}
+              <ClaimTab
+                baseMinor={takeThisRank}
+                displayMinor={convertFromBase(takeThisRank, currency, rate, 'ceil')}
+                currency={currency}
+              />
 
               <span className="rank num">{r.rank}</span>
 
@@ -113,15 +117,6 @@ export default function Board({
 
               <div className="row-money">
                 <Money minor={convertFromBase(shown, currency, rate)} currency={currency} />
-                {converted && (
-                  <div className="money-sub num">
-                    paid {new Intl.NumberFormat('en-IN', {
-                      style: 'currency',
-                      currency: BASE_CURRENCY,
-                      maximumFractionDigits: 0,
-                    }).format(shown / 100)}
-                  </div>
-                )}
               </div>
             </li>
           )

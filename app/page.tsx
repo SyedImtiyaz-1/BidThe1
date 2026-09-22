@@ -3,7 +3,7 @@ import ClaimPanel from '@/components/ClaimPanel'
 import TodayRail from '@/components/TodayRail'
 import Board from '@/components/Board'
 import { Trophy } from '@/components/icons'
-import { getBoard, getLeader, countListings, priceToLead } from '@/lib/rank'
+import { getBoard, priceToLead, getTotals } from '@/lib/rank'
 import { getRates } from '@/lib/fx'
 import { getDisplayCurrency } from '@/lib/session'
 import { CATEGORIES, MIN_FIRST_PAYMENT_MINOR } from '@/lib/config'
@@ -33,13 +33,17 @@ export default async function Page({ searchParams }: { searchParams: Promise<Sea
 
   const [{ rates }, currency] = await Promise.all([getRates(), getDisplayCurrency()])
 
-  const [rows, leader, total] = await Promise.all([
+  // Sorted totals answer three questions at once: who leads (the first entry),
+  // how many listings there are (the length) and what rank any amount buys.
+  // That is two fewer round trips per render, which matters more than it looks
+  // when the database is a continent away.
+  const [rows, totals] = await Promise.all([
     getBoard({ scope, category, limit: PAGE_SIZE, offset: (page - 1) * PAGE_SIZE }),
-    getLeader(category),
-    countListings(category),
+    getTotals(category),
   ])
 
-  const nextPrice = priceToLead(leader?.total_minor ?? 0, 0)
+  const total = totals.length
+  const nextPrice = priceToLead(totals[0] ?? 0, 0)
   const rate = rates[currency] ?? 1
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
   const from = total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1
@@ -83,6 +87,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Sea
         minMinor={MIN_FIRST_PAYMENT_MINOR}
         currency={currency}
         rate={rate}
+        totals={totals}
       />
 
       {sp.claimed && (

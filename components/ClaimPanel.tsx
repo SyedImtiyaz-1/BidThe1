@@ -14,16 +14,36 @@ type ClaimResult = {
   order: { provider: 'dodo' | 'mock'; orderId: string; checkoutUrl?: string }
 }
 
+/**
+ * What rank an amount buys, given every live total sorted high to low.
+ *
+ * Ties lose, matching the board itself: paying exactly what a listing holds
+ * leaves you below it, because it reached that total first. Binary search so
+ * this stays instant on a board of thousands.
+ */
+function rankFor(amountMinor: number, totals: number[]): number {
+  let lo = 0
+  let hi = totals.length
+  while (lo < hi) {
+    const mid = (lo + hi) >> 1
+    if (totals[mid] >= amountMinor) lo = mid + 1
+    else hi = mid
+  }
+  return lo + 1
+}
+
 export default function ClaimPanel({
   suggestedMinor,
   minMinor,
   currency,
   rate,
+  totals,
 }: {
   suggestedMinor: number
   minMinor: number
   currency: string
   rate: number
+  totals: number[]
 }) {
   const router = useRouter()
   const dialog = useRef<HTMLDialogElement>(null)
@@ -34,6 +54,19 @@ export default function ClaimPanel({
   // that wraps it would finish before React re-rendered and animate nothing.
   // Holding the transition open until the pending flag clears is what makes
   // the rows actually travel to their new positions.
+  // A "claim this rank" badge on the board sets the amount here.
+  useEffect(() => {
+    const onPick = (e: Event) => {
+      const minor = (e as CustomEvent<number>).detail
+      if (Number.isFinite(minor)) {
+        setTyping(null)
+        setAmount(Math.min(MAX_PAYMENT_MINOR, Math.max(minMinor, minor)))
+      }
+    }
+    window.addEventListener('claim-amount', onPick)
+    return () => window.removeEventListener('claim-amount', onPick)
+  }, [minMinor])
+
   useEffect(() => {
     if (!isPending && settle.current) {
       settle.current()
@@ -52,6 +85,14 @@ export default function ClaimPanel({
   const converted = currency !== BASE_CURRENCY
   const shownMinor = convertFromBase(amount, currency, rate, 'ceil')
   const parts = moneyParts(shownMinor, currency)
+
+  /**
+   * The headline rank follows the amount. This assumes a new listing, which is
+   * what the headline is offering; if the URL turns out to be one already on
+   * the board its top-up accumulates, so the confirm dialog shows the real
+   * rank computed server-side.
+   */
+  const heroRank = rankFor(amount, totals)
 
   /**
    * The price is editable as well as steppable. While it has focus it holds
@@ -140,7 +181,7 @@ export default function ClaimPanel({
     <div id="claim">
       <div className="hero">
         <h1 className="head-line display">
-          <span>Claim #1 for</span>
+          <span>Claim #{heroRank} for</span>
           <button
             className="step-btn"
             aria-label="Lower the amount"
@@ -204,10 +245,20 @@ export default function ClaimPanel({
           </button>
         </div>
 
+        {/* Everything here is quoted in the currency on screen. The one
+            exception is the charge itself, which is stated separately and in
+            full, because a converted price that differs from the amount
+            actually debited is drip pricing under the CCPA guidelines. */}
         <p className="step-note num">
-          {formatMoney(minMinor, BASE_CURRENCY)} minimum, {formatMoney(STEP_MINOR, BASE_CURRENCY)} steps
-          {converted && <> · charged {formatMoney(amount, BASE_CURRENCY)} in {BASE_CURRENCY}</>}
+          {formatMoney(convertFromBase(minMinor, currency, rate, 'ceil'), currency)} minimum,{' '}
+          {formatMoney(convertFromBase(STEP_MINOR, currency, rate, 'ceil'), currency)} steps
         </p>
+        {converted && (
+          <p className="step-note charge-note num">
+            You are charged {formatMoney(amount, BASE_CURRENCY, { decimals: true })} in{' '}
+            {BASE_CURRENCY}
+          </p>
+        )}
 
         {error && !claim && <p className="err" style={{ marginTop: 10 }}>{error}</p>}
       </div>

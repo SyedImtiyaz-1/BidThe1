@@ -27,6 +27,15 @@ export const MAX_PAYMENT_MINOR = 50_000_000
 export const SITE_NAME = process.env.NEXT_PUBLIC_SITE_NAME || 'coolapp'
 export const SITE_DOMAIN = `${SITE_NAME}.lol`
 
+/** Absolute origin, needed for canonicals, Open Graph and the sitemap. */
+export const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL
+    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+    : 'http://localhost:3000')
+
+export const SITE_TAGLINE = 'The board is sorted by money. Nothing else.'
+
 /**
  * One source of truth for the details that have to appear in the footer, the
  * imprint, the terms and the grievance route. Indian IT Rules 2021 Rule 3(2)

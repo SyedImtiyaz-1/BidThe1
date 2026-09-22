@@ -63,7 +63,20 @@ async function storeRates(rates: Rates) {
  * Rates are read from the table on the render path, never from the API. A page
  * render must not depend on a third party being up.
  */
+let ratesCache: { at: number; value: { rates: Rates; asOf: Date | null } } | null = null
+
+/**
+ * Rates change once a day, so holding them in memory for five minutes removes
+ * a query from nearly every render at no cost to accuracy.
+ */
 export async function getRates(): Promise<{ rates: Rates; asOf: Date | null }> {
+  if (ratesCache && Date.now() - ratesCache.at < 300_000) return ratesCache.value
+  const value = await readRates()
+  ratesCache = { at: Date.now(), value }
+  return value
+}
+
+async function readRates(): Promise<{ rates: Rates; asOf: Date | null }> {
   const rows = await q<{ currency: string; per_base: string; fetched_at: Date }>(
     `select currency, per_base, fetched_at from fx_rates`,
   )

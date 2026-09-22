@@ -188,6 +188,25 @@ export async function projectedRank(
   return num(r?.n) + 1
 }
 
+/**
+ * Every live total, highest first, for working out on the client what rank a
+ * given amount would buy. Just the numbers, and they are all public on the
+ * board anyway, so nothing is disclosed that a reader cannot already see.
+ */
+export async function getTotals(category?: string, limit = 5000): Promise<number[]> {
+  const cat = category && category !== 'all' ? category : null
+  const rows = await q<{ total_minor: string }>(
+    `select total_minor from listings
+      where status = 'live'
+        and total_minor > 0
+        and ($1::text is null or category = $1::text)
+      order by total_minor desc
+      limit $2`,
+    [cat, limit],
+  )
+  return rows.map((r) => num(r.total_minor))
+}
+
 export type Day = { day: string; totalMinor: number; listings: number; payments: number }
 
 /** Every UTC day that saw a payment, newest first. */
@@ -238,11 +257,27 @@ export async function getCategoryStats(): Promise<CategoryStat[]> {
 export type Stats = { online: number; visitorsToday: number; listings: number; totalMinor: number }
 
 /**
+ * Cached for ten seconds per instance.
+ *
+ * The nav counters run on every single page render, and "online" is already a
+ * five-minute window, so a ten second cache costs no accuracy and removes a
+ * round trip from most requests.
+ */
+let statsCache: { at: number; value: Stats } | null = null
+
+export async function getStats(): Promise<Stats> {
+  if (statsCache && Date.now() - statsCache.at < 10_000) return statsCache.value
+  const value = await readStats()
+  statsCache = { at: Date.now(), value }
+  return value
+}
+
+/**
  * Real numbers or no numbers. A fabricated "13 online" is textbook false
  * urgency under the CCPA dark-pattern guidelines, and this operator is in
  * India and squarely in scope.
  */
-export async function getStats(): Promise<Stats> {
+async function readStats(): Promise<Stats> {
   const r = await one<Record<string, any>>(
     `select
        (select count(*)::int from presence
