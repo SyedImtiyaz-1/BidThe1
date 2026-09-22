@@ -62,30 +62,32 @@ its reported total is in that currency's minor unit rather than in cents.
 
 ## Before taking real money
 
-- [ ] Dodo Payments account approved, and a one-time product created with Pay What You Want
-      enabled. Put its id in `DODO_PRODUCT_ID`. The server sets the amount on every checkout,
-      so the buyer never picks their own price.
+- [ ] Dodo account approved for **live** payments. Until it is, every checkout returns
+      `403 MERCHANT_NOT_LIVE` and nothing else on this list matters.
+- [ ] A one-time product created **in live mode, priced in USD**, with Pay What You Want
+      enabled. Put its id in `DODO_PRODUCT_ID`. A test-mode id does not resolve in live, and
+      an INR-priced product would read the cents this app sends as paise.
+- [ ] **Adaptive currency enabled** in the Dodo dashboard. The checkout deliberately does not
+      pin a billing currency, because the local rails are currency-bound: UPI settles in
+      rupees, so a buyer pinned to dollars is offered cards and nothing else. With adaptive
+      currency on, each buyer is quoted in their own money and sees their own methods.
+- [ ] Payment methods enabled on the account: cards, UPI, PayPal, and whatever else suits the
+      audience. The app names no allow-list, so whatever is enabled is what appears.
 - [ ] Webhook endpoint registered at `/api/webhooks/dodo` **on the primary host** with the
       signing secret in `DODO_WEBHOOK_SECRET`. Vercel serves one domain and 308-redirects the
       others (today `coolapp.lol` redirects to `www.coolapp.lol`), and webhook senders do not
       follow redirects, so an endpoint on the wrong host fails every delivery with a 308 that
-      looks like a success from the dashboard's "sent" column. Check with an unsigned POST:
-      the right host answers `400`, the wrong one `308`. The secret is per endpoint and lives in Dodo, so copy it from
-      there (`GET /webhooks/{id}/secret`, or the dashboard); a made-up value means every
-      delivery is answered `400 bad signature` and nothing is ever credited. Subscribe to
-      `payment.succeeded`, the refund events and the dispute events. Without the refund and
-      dispute events a charged-back listing keeps a rank it no longer paid for.
+      looks like a success in the dashboard. Check with an unsigned POST: the right host
+      answers `400`, the wrong one `308`. Subscribe to `payment.succeeded`, the refund events
+      and the dispute events. Without the refund and dispute events a charged-back listing
+      keeps a rank it no longer paid for.
 - [ ] Describe the business as advertising placement, which is what it is. Keep auction
       vocabulary out of the product and the merchant application.
 - [ ] Vercel Pro. Hobby's terms prohibit "any method of requesting or processing payment from
       visitors", and Hobby also caps cron at once per day.
 - [ ] A real Postgres in `DATABASE_URL`. Supabase and Neon both work.
-- [ ] Fill the placeholders in `app/terms`, `app/refunds`, `components/Footer.tsx`: legal name,
-      address, GSTIN, grievance officer. Payment providers ask for these pages during review,
-      and the disclosure duties are real regardless, so this is a gating dependency rather
-      than polish.
-- [ ] Confirm Dodo will settle this merchant in USD. `billing_currency` is USD, and an
-      account only approved for INR will reject every checkout.
+- [ ] Fill the legal name and address in `lib/config.ts`. `gstin` stays empty while the
+      operator is not GST registered; the imprint omits the line rather than printing a blank.
 - [ ] An empty board is the honest one. Every listing on it was paid for; the empty state
       sells the first spot at the minimum rather than showing invented rivals.
 

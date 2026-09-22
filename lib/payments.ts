@@ -192,12 +192,26 @@ export async function createOrder(args: {
           amount: args.amountMinor,
         },
       ],
-      billing_currency: BASE_CURRENCY,
+      /**
+       * billing_currency is deliberately not set.
+       *
+       * Setting it pins every customer to one currency, and the local payment
+       * rails are currency-bound: UPI settles in rupees, so a buyer forced
+       * onto a dollar charge is offered cards and nothing else. Leaving it off
+       * lets Dodo's adaptive currency quote each buyer in their own money,
+       * which is what puts UPI in front of an Indian buyer and iDEAL in front
+       * of a Dutch one. The product itself is priced in USD, so the amount
+       * above is read as cents either way.
+       *
+       * allowed_payment_method_types is likewise left off: naming a list can
+       * only narrow what the account already offers, and the aim is the
+       * widest set of ways to pay.
+       */
       return_url: args.returnUrl,
       // The ledger credits from metadata, never from the amount Dodo reports.
-      // If Dodo settles in a different currency its reported total is in that
-      // currency's minor unit, and crediting that as paise would be wrong by
-      // roughly a factor of 85.
+      // That is what makes adaptive currency safe: a buyer charged in rupees
+      // still buys exactly the dollars quoted, because the rank is credited
+      // from the number we asked for and not the number they were billed.
       metadata: {
         listing_id: args.listingId,
         amount_minor: String(args.amountMinor),

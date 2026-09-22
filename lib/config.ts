@@ -45,7 +45,12 @@ export const SITE_TAGLINE = 'The board is sorted by money. Nothing else.'
  * require the provider's identity and address.
  */
 export const BUSINESS = {
-  /** Still needed: the GSTIN once issued. */
+  /**
+   * Sole proprietor, not GST registered. The payment processor is the merchant
+   * of record, so it is the seller on the buyer's invoice and it collects and
+   * remits the tax. Set gstin here if that changes and the imprint will show
+   * it; the page already omits the line when it is empty.
+   */
   legalName: 'Syed Imtiyaz Ali',
   owner: 'ImtiyazSDE',
   address: 'Bhande Plot, Umred Road, Plot No. 50, Nagpur 440024, Maharashtra, India',
