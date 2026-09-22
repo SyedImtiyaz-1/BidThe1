@@ -36,9 +36,10 @@ export async function POST(req: Request) {
     )
   }
 
-  const category = PICKABLE_CATEGORIES.some((c) => c.slug === body.category)
-    ? body.category!
-    : meta.category ?? 'other'
+  if (!PICKABLE_CATEGORIES.some((c) => c.slug === body.category)) {
+    return NextResponse.json({ error: 'Choose a category.' }, { status: 400 })
+  }
+  const category = body.category!
 
   // One listing per product. The key is the host for an ordinary site, but
   // carries a path segment for platforms like x.com and apps.apple.com, where

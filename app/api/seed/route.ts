@@ -21,7 +21,7 @@ const SEED = [
   ['cal.com',        'Cal.com',          'Open source scheduling you can host yourself.',                      'productivity',  249900,  6650, 25],
   ['tally.so',       'Tally',            'Forms that work like a doc. Free for unlimited responses.',          'marketing',     180000,  5121, 40],
   ['plausible.io',   'Plausible',        'Privacy friendly analytics. No cookies, 1 KB script.',               'marketing',      99900,  3980, 14],
-  ['hey.com',        'HEY',              'Email that is opinionated about what belongs in an inbox.',          'other',          79900,  2410, 48],
+  ['hey.com',        'HEY',              'Email that is opinionated about what belongs in an inbox.',          'productivity',   79900,  2410, 48],
   ['excalidraw.com', 'Excalidraw',       'Hand drawn style whiteboarding that loads instantly.',               'design',         49900,  1702,  3],
 ] as const
 

@@ -97,20 +97,6 @@ export default function Board({
                   <span className="num">{r.click_count.toLocaleString('en-US')} clicks</span>
                   <span className="sep">·</span>
                   <Link href={`/product/${r.slug}`} className="details">see details</Link>
-                  {r.click_count > 0 && shown > 0 && (
-                    <>
-                      <span className="sep">·</span>
-                      {/* The number that turns a rank into an ad buy. */}
-                      <span className="num">
-                        <Money
-                          minor={convertFromBase(Math.round(shown / r.click_count), currency, rate)}
-                          currency={currency}
-                          decimals
-                        />
-                        /click
-                      </span>
-                    </>
-                  )}
                 </div>
               </div>
             </li>
