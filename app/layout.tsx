@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 import Script from 'next/script'
+import { Suspense } from 'react'
+import Analytics from '@/components/Analytics'
 import { Poppins } from 'next/font/google'
 import { cookies } from 'next/headers'
 import './globals.css'
@@ -114,6 +116,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body>
         <Nav />
         <main>{children}</main>
+        {/* useSearchParams needs a boundary or the whole page opts out of
+            static rendering. */}
+        <Suspense fallback={null}><Analytics /></Suspense>
         {/* The AskMySite chat bubble. lazyOnload: it fetches after the page is
             idle, so a third-party script never sits between a visitor and the
             board, which is what the speed work was for. */}

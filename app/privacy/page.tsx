@@ -7,7 +7,7 @@ export default function Page() {
     <div className="wrap prose">
       <h1>Privacy</h1>
       <p className="lead">
-        No accounts, no tracking pixels, no advertising networks. Here is everything we store.
+        No accounts, no advertising networks, nothing sold to anyone. Here is everything we store.
       </p>
 
       <h2>What we store</h2>
@@ -20,6 +20,12 @@ export default function Page() {
           reversed to one.
         </li>
         <li>Two cookies that hold nothing but your chosen currency and light or dark theme.</li>
+        <li>
+          Product analytics: which pages were opened and in what order, the country and kind of
+          device, tied to a random id kept in your browser. It tells us whether the board is
+          being read and where people give up. No screen recording, no names, no email
+          addresses, and nothing typed into a form.
+        </li>
       </ul>
 
       <h2>What we do not store</h2>
@@ -32,12 +38,14 @@ export default function Page() {
       <p>
         Our payment processor, which acts as merchant of record and needs your billing details to
         charge you and to handle tax. Our database and hosting providers, which store the data
-        above on our behalf. Nobody else, and we do not sell anything to anyone.
+        above on our behalf. PostHog, which runs the product analytics described above.
+        Nobody else, and we do not sell anything to anyone.
       </p>
 
       <h2>Deletion</h2>
       <p>
-        Email <a href={`mailto:${BUSINESS.email}`}>{BUSINESS.email}</a> and we will remove your
+        Turn on Do Not Track or Global Privacy Control in your browser and we stop counting
+        you. Email <a href={`mailto:${BUSINESS.email}`}>{BUSINESS.email}</a> and we will remove your
         listing. Payment records are kept as long as tax law requires.
       </p>
     </div>
