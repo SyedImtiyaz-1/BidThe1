@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react'
 import { usePathname, useSearchParams } from 'next/navigation'
-import posthog from 'posthog-js'
+import { initAnalytics, capture } from '@/lib/analytics'
 
 const KEY = process.env.NEXT_PUBLIC_POSTHOG_KEY
 
@@ -22,8 +22,8 @@ export default function Analytics() {
   const params = useSearchParams()
 
   useEffect(() => {
-    if (!KEY || posthog.__loaded) return
-    posthog.init(KEY, {
+    if (!KEY) return
+    void initAnalytics(KEY, {
       api_host: '/ingest',
       ui_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://us.posthog.com',
       // The App Router changes route without a page load, so PostHog's own
@@ -42,13 +42,10 @@ export default function Analytics() {
 
   useEffect(() => {
     if (!KEY) return
-    // No __loaded guard. init() above runs in an earlier effect of the same
-    // commit but finishes resolving remote config later, and gating on that
-    // flag dropped the first pageview and never retried it, because the
-    // dependencies had not changed. posthog buffers calls made before it is
-    // ready, so calling straight through is both simpler and correct.
+    // Queued if the library has not landed yet, so the first pageview of a
+    // visit is never the one that gets lost.
     const qs = params?.toString()
-    posthog.capture('$pageview', { $current_url: window.location.href, path: pathname, query: qs || undefined })
+    capture('$pageview', { $current_url: window.location.href, path: pathname, query: qs || undefined })
   }, [pathname, params])
 
   return null

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import posthog from 'posthog-js'
+import { capture } from '@/lib/analytics'
 import { Plus, Minus, Bolt, Globe, Phone } from './icons'
 import { PICKABLE_CATEGORIES, MAX_PAYMENT_MINOR } from '@/lib/config'
 import { formatMoney, moneyParts, unitMinor, unitsToBase, unitsToBeat, displayUnits } from '@/lib/money'
@@ -154,7 +154,7 @@ export default function ClaimPanel({
       setAgreed(false)
       dialog.current?.showModal()
       // The funnel worth measuring: board seen -> price set -> money taken.
-      posthog.capture?.('claim_started', {
+      capture('claim_started', {
         category, kind, rank_projected: json.rankProjected,
         amount_minor: json.amountMinor,
       })
@@ -203,7 +203,7 @@ export default function ClaimPanel({
       // comes back to /?claimed=<slug> and the webhook is what actually moves
       // the board.
       if (!claim.order.checkoutUrl) throw new Error('No checkout link came back. Try again.')
-      posthog.capture?.('checkout_opened', {
+      capture('checkout_opened', {
         category, rank_projected: claim.rankProjected, amount_minor: claim.amountMinor,
       })
       window.location.assign(claim.order.checkoutUrl)
