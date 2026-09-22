@@ -47,7 +47,7 @@ export default function Page() {
 
       <h2>Contact</h2>
       <p>
-        {BUSINESS.legalName}, {BUSINESS.address}. Grievance officer {BUSINESS.owner},{' '}
+        {BUSINESS.legalName}, {BUSINESS.address}. Grievance officer {BUSINESS.legalName},{' '}
         <a href={`mailto:${BUSINESS.email}`}>{BUSINESS.email}</a>.
       </p>
     </div>

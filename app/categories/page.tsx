@@ -1,44 +1,145 @@
 import Link from 'next/link'
-import { getCategoryStats } from '@/lib/rank'
+import Money from '@/components/Money'
+import { Trophy } from '@/components/icons'
+import { getCategoryBoards } from '@/lib/rank'
 import { getRates } from '@/lib/fx'
 import { getDisplayCurrency } from '@/lib/session'
-import { convertFromBase, formatMoney } from '@/lib/money'
-import { PICKABLE_CATEGORIES } from '@/lib/config'
+import { convertFromBase, unitsToBeat, unitMinor } from '@/lib/money'
+import { PICKABLE_CATEGORIES, MIN_FIRST_PAYMENT_MINOR } from '@/lib/config'
+import { ago } from '@/lib/time'
 
 export const dynamic = 'force-dynamic'
-export const metadata = { title: 'Categories' }
+export const metadata = {
+  title: 'Categories',
+  description:
+    'Every category is its own board. See where ranks are being claimed, who holds the top spot, and what it costs to take it.',
+}
 
-export default async function Page() {
-  const [stats, { rates }, currency] = await Promise.all([
-    getCategoryStats(), getRates(), getDisplayCurrency(),
+const LABEL = new Map<string, string>(PICKABLE_CATEGORIES.map((c) => [c.slug, c.label]))
+
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{ scope?: string }>
+}) {
+  const sp = await searchParams
+  const scope: 'all' | 'today' = sp.scope === 'today' ? 'today' : 'all'
+
+  const [boards, { rates }, currency] = await Promise.all([
+    getCategoryBoards(scope), getRates(), getDisplayCurrency(),
   ])
   const rate = rates[currency] ?? 1
-  const by = new Map(stats.map((s) => [s.slug, s]))
+  const by = new Map(boards.map((b) => [b.slug, b]))
+
+  // Hottest means claims first and recency second: a category with four claims
+  // today outranks one with four claims that all landed last month.
+  const hottest = [...boards]
+    .filter((b) => b.claims > 0)
+    .sort((a, b) =>
+      b.claims - a.claims ||
+      new Date(b.lastClaimAt ?? 0).getTime() - new Date(a.lastClaimAt ?? 0).getTime(),
+    )
+    .slice(0, 3)
+
+  const href = (s: 'all' | 'today') => (s === 'all' ? '/categories' : '/categories?scope=today')
 
   return (
-    <div className="wrap prose" style={{ maxWidth: 860 }}>
-      <h1>Categories</h1>
-      <p className="lead">
-        Every category is its own board. Being first overall is expensive; being first in a
-        category is not.
-      </p>
+    <div className="wrap">
+      <div className="scope">
+        <div className="scope-in">
+          <Link href={href('all')} aria-current={scope === 'all'}><Trophy /> All-time</Link>
+          <Link href={href('today')} aria-current={scope === 'today'}>Today</Link>
+        </div>
+      </div>
 
-      <div className="cat-grid">
-        {PICKABLE_CATEGORIES.map((c) => {
-          const s = by.get(c.slug)
-          return (
-            <Link key={c.slug} href={`/?category=${c.slug}`} className="cat-card">
-              <span className="cat-name">{c.label}</span>
-              <span className="cat-count num">
-                {s ? `${s.listings} ${s.listings === 1 ? 'listing' : 'listings'}` : 'Empty'}
+      <header className="cat-head">
+        <h1>Most active categories</h1>
+        <p className="lead">
+          Where ranks are getting claimed, and who is holding the top spot.
+          {scope === 'today' && ' Counting money paid since 00:00 UTC.'}
+        </p>
+      </header>
+
+      {hottest.length > 0 ? (
+        <div className="hot-grid">
+          {hottest.map((b, i) => (
+            <Link key={b.slug} href={`/?category=${b.slug}`} className="hot-card">
+              <span className="hot-badge num">{i === 0 ? '#1 hottest' : `#${i + 1}`}</span>
+              <span className="hot-name">{LABEL.get(b.slug) ?? b.slug}</span>
+              <span className="hot-meta num">
+                {b.claims} {b.claims === 1 ? 'claim' : 'claims'}
+                <span className="sep">·</span>
+                {ago(b.lastClaimAt)}
               </span>
-              <span className="cat-top">
-                {s?.top ? <>#1 {s.top}</> : 'Nobody has claimed this one'}
-              </span>
-              <span className="cat-total num">
-                {s ? formatMoney(convertFromBase(s.totalMinor, currency, rate), currency) : '—'}
-              </span>
+              {b.top[0] && (
+                <span className="hot-lead">
+                  <span className="hot-lead-k">Leading</span> {b.top[0].title}
+                </span>
+              )}
+              {b.top[0] && (
+                <span className="hot-amt">
+                  <Money
+                    minor={convertFromBase(b.top[0].amountMinor, currency, rate)}
+                    currency={currency}
+                  />
+                </span>
+              )}
             </Link>
+          ))}
+        </div>
+      ) : (
+        <p className="empty">
+          {scope === 'today'
+            ? 'No claims yet today. Every category is open at the minimum.'
+            : 'Nothing claimed anywhere yet. Every category is open at the minimum.'}
+        </p>
+      )}
+
+      <div className="cat-boards">
+        {PICKABLE_CATEGORIES.map((c) => {
+          const b = by.get(c.slug)
+          // What the next person pays to lead this category, in the currency
+          // on screen and one whole unit above the number printed above it.
+          const toLead = unitsToBeat(
+            b?.top[0]?.amountMinor ?? 0, currency, rate, MIN_FIRST_PAYMENT_MINOR,
+          )
+          return (
+            <section key={c.slug} className="cat-board">
+              <h2>
+                <Link href={`/?category=${c.slug}`}>{c.label}</Link>
+                <span className="cat-board-take num">
+                  <Money minor={toLead * unitMinor(currency)} currency={currency} /> to lead
+                </span>
+              </h2>
+
+              {b && b.top.length > 0 ? (
+                <ol className="cat-rows">
+                  {b.top.map((t, i) => (
+                    <li key={t.slug}>
+                      <span className="cat-rank num">#{i + 1}</span>
+                      <a
+                        className="cat-row-title"
+                        href={`/go/${t.slug}`}
+                        rel="sponsored nofollow noopener"
+                        target="_blank"
+                      >
+                        {t.title}
+                      </a>
+                      <span className="cat-row-amt num">
+                        <Money
+                          minor={convertFromBase(t.amountMinor, currency, rate)}
+                          currency={currency}
+                        />
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+              ) : (
+                <p className="cat-empty">
+                  Nobody has claimed this one{scope === 'today' ? ' today' : ''}.
+                </p>
+              )}
+            </section>
           )
         })}
       </div>

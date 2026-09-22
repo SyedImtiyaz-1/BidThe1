@@ -23,9 +23,9 @@ export default function Page() {
 
       <h2>Grievance officer</h2>
       <p>
-        {BUSINESS.owner}, <a href={`mailto:${BUSINESS.email}`}>{BUSINESS.email}</a>. We
-        acknowledge complaints within 24 hours and resolve them within 15 days, as the
-        Information Technology Rules 2021 require. To report a listing, see{' '}
+        {BUSINESS.legalName}, <a href={`mailto:${BUSINESS.email}`}>{BUSINESS.email}</a>. We
+        acknowledge complaints within 24 hours and resolve them within 7 days, inside the
+        fifteen the Information Technology Rules 2021 allow. To report a listing, see{' '}
         <a href="/report">report a listing</a>.
       </p>
 

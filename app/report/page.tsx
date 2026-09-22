@@ -11,11 +11,11 @@ export default function Page() {
         what is wrong with it.
       </p>
       <p>
-        We acknowledge within 24 hours and resolve within 15 days. Illegal content, malware and
+        We acknowledge within 24 hours and resolve within 7 days. Illegal content, malware and
         impersonation are removed first and discussed afterwards. Trademark and copyright
         complaints go to the same address and are handled the same way.
       </p>
-      <p>Grievance officer: {BUSINESS.owner}, {BUSINESS.email}.</p>
+      <p>Grievance officer: {BUSINESS.legalName}, {BUSINESS.email}.</p>
     </div>
   )
 }

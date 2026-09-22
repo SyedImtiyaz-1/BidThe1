@@ -1,8 +1,8 @@
 import Link from 'next/link'
 import Money from './Money'
 import type { BoardRow } from '@/lib/rank'
-import { convertFromBase } from '@/lib/money'
-import { BASE_CURRENCY, CATEGORIES, STEP_MINOR, MIN_FIRST_PAYMENT_MINOR } from '@/lib/config'
+import { convertFromBase, unitsToBeat, unitsToBase, unitMinor } from '@/lib/money'
+import { CATEGORIES, MIN_FIRST_PAYMENT_MINOR } from '@/lib/config'
 import ClaimTab from './ClaimTab'
 import type { Rates } from '@/lib/fx'
 
@@ -56,9 +56,10 @@ export default function Board({
           const podium = r.rank <= 3
 
           // Ties lose, so taking a rank means exceeding what that listing
-          // holds, not matching it. One step above is the cheapest amount that
-          // does it.
-          const takeThisRank = Math.max(MIN_FIRST_PAYMENT_MINOR, shown + STEP_MINOR)
+          // holds, not matching it. Priced in whole units of the currency on
+          // screen, because a row showing $433 has to be beaten by $434: a ₹1
+          // step is about a cent, and a cent is invisible here.
+          const takeUnits = unitsToBeat(shown, currency, rate, MIN_FIRST_PAYMENT_MINOR)
           return (
             <li
               key={r.id}
@@ -69,8 +70,8 @@ export default function Board({
               style={{ viewTransitionName: `row-${r.slug}` }}
             >
               <ClaimTab
-                baseMinor={takeThisRank}
-                displayMinor={convertFromBase(takeThisRank, currency, rate, 'ceil')}
+                baseMinor={unitsToBase(takeUnits, currency, rate)}
+                displayMinor={takeUnits * unitMinor(currency)}
                 currency={currency}
               />
 

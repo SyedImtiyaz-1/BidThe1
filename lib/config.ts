@@ -43,12 +43,12 @@ export const SITE_TAGLINE = 'The board is sorted by money. Nothing else.'
  * require the provider's identity and address.
  */
 export const BUSINESS = {
-  /** Still needed: the name exactly as registered, and the GSTIN once issued. */
-  legalName: 'Syed Imtiyaz [surname as registered]',
+  /** Still needed: the GSTIN once issued. */
+  legalName: 'Syed Imtiyaz Ali',
   owner: 'ImtiyazSDE',
   address: 'Bhande Plot, Umred Road, Plot No. 50, Nagpur 440024, Maharashtra, India',
   email: 'contact@coolapp.lol',
-  x: 'coolappdotdev',
+  x: 'coolappdotlol',
   gstin: '',
 } as const
 

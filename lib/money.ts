@@ -132,3 +132,69 @@ export function formatConverted(
 ) {
   return formatMoney(convertFromBase(baseMinor, currency, perBase, mode), currency, opts)
 }
+
+/** One whole unit in minor units: ₹1 is 100 paise, ¥1 is 1 yen, KD 1 is 1000 fils. */
+export function unitMinor(currency: string): number {
+  return 10 ** minorDigits(currency)
+}
+
+/**
+ * The ladder as the viewer actually sees it.
+ *
+ * The real step is ₹1. Converted to dollars that is about one cent, and the
+ * board prints whole dollars, so two amounts a rupee apart show the same
+ * number while ranking differently. That is how a row holding $433 offered
+ * "claim this rank for $433", and how $17,001 landed second behind $17,001.
+ *
+ * So the viewer's ladder steps in whole units of the viewer's own currency,
+ * and the charge is whatever that costs in rupees, rounded up. What is on
+ * screen is then exactly what decides the rank.
+ */
+export function unitsToBase(units: number, currency: string, perBase: number): number {
+  return convertToBase(units * unitMinor(currency), currency, perBase, 'ceil')
+}
+
+/** Base minor to the smallest whole unit count worth at least that much. */
+export function baseToUnits(baseMinor: number, currency: string, perBase: number): number {
+  return Math.ceil(convertFromBase(baseMinor, currency, perBase, 'ceil') / unitMinor(currency))
+}
+
+/** Base minor to the largest whole unit count worth no more than that. */
+export function baseToUnitsDown(baseMinor: number, currency: string, perBase: number): number {
+  return Math.floor(convertFromBase(baseMinor, currency, perBase, 'floor') / unitMinor(currency))
+}
+
+/** The whole-unit number the board actually prints for an amount. */
+export function displayUnits(baseMinor: number, currency: string, perBase: number): number {
+  return Math.round(convertFromBase(baseMinor, currency, perBase, 'round') / unitMinor(currency))
+}
+
+/**
+ * The cheapest whole-unit amount that actually passes `targetBase`.
+ *
+ * Ties lose on this board, so passing someone means exceeding what they hold.
+ * It has to exceed it twice over:
+ *
+ *  - on screen, because a row printing $433 offering "claim this rank for
+ *    $433" is nonsense to read, whatever the paise underneath are doing;
+ *  - underneath, because the paise are what the ranking query compares.
+ *
+ * The first is the binding one at normal rates, the second matters when a unit
+ * of the display currency is worth less than a rupee. So: one above the
+ * printed number, then walk until the charge genuinely clears.
+ */
+export function unitsToBeat(
+  targetBaseMinor: number,
+  currency: string,
+  perBase: number,
+  minBaseMinor = 0,
+): number {
+  let units = Math.max(
+    1,
+    baseToUnits(minBaseMinor, currency, perBase),
+    targetBaseMinor > 0 ? displayUnits(targetBaseMinor, currency, perBase) + 1 : 0,
+  )
+  // A ceil on each side can compound, so cap the walk rather than loop freely.
+  for (let i = 0; i < 8 && unitsToBase(units, currency, perBase) <= targetBaseMinor; i++) units++
+  return units
+}

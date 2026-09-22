@@ -3,8 +3,10 @@
 import { useEffect, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { Plus, Minus } from './icons'
-import { PICKABLE_CATEGORIES, STEP_MINOR, BASE_CURRENCY, MAX_PAYMENT_MINOR } from '@/lib/config'
-import { convertFromBase, convertToBase, formatMoney, moneyParts, minorDigits } from '@/lib/money'
+import { PICKABLE_CATEGORIES, BASE_CURRENCY, MAX_PAYMENT_MINOR } from '@/lib/config'
+import {
+  formatMoney, moneyParts, unitMinor, unitsToBase, unitsToBeat, baseToUnits, baseToUnitsDown,
+} from '@/lib/money'
 
 type ClaimResult = {
   listingId: string
@@ -13,6 +15,8 @@ type ClaimResult = {
   amountMinor: number
   order: { provider: 'dodo' | 'mock'; orderId: string; checkoutUrl?: string }
 }
+
+const LABEL = new Map<string, string>(PICKABLE_CATEGORIES.map((c) => [c.slug, c.label]))
 
 /**
  * What rank an amount buys, given every live total sorted high to low.
@@ -33,66 +37,99 @@ function rankFor(amountMinor: number, totals: number[]): number {
 }
 
 export default function ClaimPanel({
-  suggestedMinor,
   minMinor,
   currency,
   rate,
-  totals,
+  totalsByCategory,
 }: {
-  suggestedMinor: number
   minMinor: number
   currency: string
   rate: number
-  totals: number[]
+  totalsByCategory: Record<string, number[]>
 }) {
   const router = useRouter()
   const dialog = useRef<HTMLDialogElement>(null)
   const [isPending, startRefresh] = useTransition()
   const settle = useRef<(() => void) | null>(null)
 
+  const [url, setUrl] = useState('')
+  const [category, setCategory] = useState(PICKABLE_CATEGORIES[0].slug as string)
+  const [agreed, setAgreed] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [claim, setClaim] = useState<ClaimResult | null>(null)
+
+  const totals = totalsByCategory[category] ?? []
+  const leader = totals[0] ?? 0
+
+  /**
+   * The amount is held in whole units of the currency on screen, not in base
+   * paise. Holding base and converting for display loses the step: ₹1 is about
+   * one US cent, and the board prints whole dollars, so the number stops
+   * moving while the rank underneath it keeps changing. Whole units on screen
+   * means what you read is what ranks.
+   */
+  const lowest = baseToUnits(minMinor, currency, rate)
+  const highest = baseToUnitsDown(MAX_PAYMENT_MINOR, currency, rate)
+  const clamp = (u: number) => Math.min(highest, Math.max(lowest, u))
+
+  const [units, setUnits] = useState(() => unitsToBeat(leader, currency, rate, minMinor))
+  const [touched, setTouched] = useState(false)
+
+  const amount = unitsToBase(units, currency, rate)
+  const parts = moneyParts(units * unitMinor(currency), currency)
+  const heroRank = rankFor(amount, totals)
+  const converted = currency !== BASE_CURRENCY
+
+  const set = (u: number) => { setTyping(null); setTouched(true); setUnits(clamp(u)) }
+
+  /**
+   * Until the amount is edited by hand it tracks whatever it takes to lead the
+   * category in the dropdown, so switching to an empty category drops the
+   * price to the floor and the headline still reads #1. Once a number has been
+   * typed or stepped, it is theirs and nothing moves it.
+   */
+  useEffect(() => {
+    if (!touched) setUnits(unitsToBeat(leader, currency, rate, minMinor))
+  }, [leader, currency, rate, minMinor, touched])
+
+  /**
+   * The currency picker refreshes the route rather than remounting, so this
+   * state survives the switch and has to be re-expressed. Convert through the
+   * old rate, then round to whole units of the new currency.
+   */
+  const shownIn = useRef({ currency, rate })
+  useEffect(() => {
+    const prev = shownIn.current
+    if (prev.currency === currency && prev.rate === rate) return
+    shownIn.current = { currency, rate }
+    if (touched) {
+      setUnits(baseToUnits(unitsToBase(units, prev.currency, prev.rate), currency, rate))
+    }
+  }, [currency, rate, units, touched])
+
+  /** A "claim this rank" badge on the board sets the amount here. */
+  useEffect(() => {
+    const onPick = (e: Event) => {
+      const d = (e as CustomEvent<{ displayMinor: number; currency: string }>).detail
+      if (!d || d.currency !== currency) return
+      // Exact integer division: the badge priced in the same units this holds.
+      set(Math.round(d.displayMinor / unitMinor(currency)))
+    }
+    window.addEventListener('claim-price', onPick)
+    return () => window.removeEventListener('claim-price', onPick)
+  }, [currency, rate, lowest, highest])
+
   // router.refresh() returns nothing and commits later, so a view transition
   // that wraps it would finish before React re-rendered and animate nothing.
   // Holding the transition open until the pending flag clears is what makes
   // the rows actually travel to their new positions.
-  // A "claim this rank" badge on the board sets the amount here.
-  useEffect(() => {
-    const onPick = (e: Event) => {
-      const minor = (e as CustomEvent<number>).detail
-      if (Number.isFinite(minor)) {
-        setTyping(null)
-        setAmount(Math.min(MAX_PAYMENT_MINOR, Math.max(minMinor, minor)))
-      }
-    }
-    window.addEventListener('claim-amount', onPick)
-    return () => window.removeEventListener('claim-amount', onPick)
-  }, [minMinor])
-
   useEffect(() => {
     if (!isPending && settle.current) {
       settle.current()
       settle.current = null
     }
   }, [isPending])
-
-  const [url, setUrl] = useState('')
-  const [category, setCategory] = useState('ai')
-  const [amount, setAmount] = useState(suggestedMinor)
-  const [agreed, setAgreed] = useState(false)
-  const [busy, setBusy] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [claim, setClaim] = useState<ClaimResult | null>(null)
-
-  const converted = currency !== BASE_CURRENCY
-  const shownMinor = convertFromBase(amount, currency, rate, 'ceil')
-  const parts = moneyParts(shownMinor, currency)
-
-  /**
-   * The headline rank follows the amount. This assumes a new listing, which is
-   * what the headline is offering; if the URL turns out to be one already on
-   * the board its top-up accumulates, so the confirm dialog shows the real
-   * rank computed server-side.
-   */
-  const heroRank = rankFor(amount, totals)
 
   /**
    * The price is editable as well as steppable. While it has focus it holds
@@ -102,13 +139,11 @@ export default function ClaimPanel({
   const [typing, setTyping] = useState<string | null>(null)
   const shown = typing ?? parts.amount
 
-  /** Digits on screen are whole units of the viewer's currency. */
   function commit(raw: string) {
     const digits = raw.replace(/[^0-9]/g, '').slice(0, 12)
     if (!digits) return
-    const displayMinor = Number(digits) * 10 ** minorDigits(currency)
-    const base = convertToBase(displayMinor, currency, rate, 'round')
-    setAmount(Math.min(MAX_PAYMENT_MINOR, Math.max(minMinor, base)))
+    setTouched(true)
+    setUnits(clamp(Number(digits)))
   }
 
   async function startClaim() {
@@ -162,6 +197,7 @@ export default function ClaimPanel({
         if (!res.ok) throw new Error((await res.json()).error || 'Payment failed.')
         dialog.current?.close()
         setUrl('')
+        setTouched(false)
         refreshAnimated()
         return
       }
@@ -181,11 +217,13 @@ export default function ClaimPanel({
     <div id="claim">
       <div className="hero">
         <h1 className="head-line display">
-          <span>Claim #{heroRank} for</span>
+          <span>
+            Claim #{heroRank} in <span className="head-cat">{LABEL.get(category)}</span> for
+          </span>
           <button
             className="step-btn"
             aria-label="Lower the amount"
-            onClick={() => { setTyping(null); setAmount((a) => Math.max(minMinor, a - STEP_MINOR)) }}
+            onClick={() => set(units - 1)}
           ><Minus /></button>
           <span className="head-price">
             <span className="sym">{parts.symbol}</span>
@@ -212,8 +250,8 @@ export default function ClaimPanel({
                 }}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') e.currentTarget.blur()
-                  if (e.key === 'ArrowUp') { e.preventDefault(); setTyping(null); setAmount((a) => Math.min(MAX_PAYMENT_MINOR, a + STEP_MINOR)) }
-                  if (e.key === 'ArrowDown') { e.preventDefault(); setTyping(null); setAmount((a) => Math.max(minMinor, a - STEP_MINOR)) }
+                  if (e.key === 'ArrowUp') { e.preventDefault(); set(units + 1) }
+                  if (e.key === 'ArrowDown') { e.preventDefault(); set(units - 1) }
                 }}
               />
             </span>
@@ -221,7 +259,7 @@ export default function ClaimPanel({
           <button
             className="step-btn"
             aria-label="Raise the amount"
-            onClick={() => { setTyping(null); setAmount((a) => Math.min(MAX_PAYMENT_MINOR, a + STEP_MINOR)) }}
+            onClick={() => set(units + 1)}
           ><Plus /></button>
         </h1>
 
@@ -250,8 +288,8 @@ export default function ClaimPanel({
             full, because a converted price that differs from the amount
             actually debited is drip pricing under the CCPA guidelines. */}
         <p className="step-note num">
-          {formatMoney(convertFromBase(minMinor, currency, rate, 'ceil'), currency)} minimum,{' '}
-          {formatMoney(convertFromBase(STEP_MINOR, currency, rate, 'ceil'), currency)} steps
+          {formatMoney(lowest * unitMinor(currency), currency)} minimum,{' '}
+          {formatMoney(unitMinor(currency), currency)} steps
         </p>
         {converted && (
           <p className="step-note charge-note num">

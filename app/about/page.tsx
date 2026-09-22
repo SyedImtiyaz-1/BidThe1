@@ -75,7 +75,7 @@ export default async function Page() {
 
       <h2>Who runs it</h2>
       <p>
-        {BUSINESS.owner} from Nagpur, India.{' '}
+        {BUSINESS.legalName} from Maharashtra, India.{' '}
         <a href={`https://x.com/${BUSINESS.x}`} rel="noopener">@{BUSINESS.x}</a> on X, or{' '}
         <a href={`mailto:${BUSINESS.email}`}>{BUSINESS.email}</a>. The full details are on the{' '}
         <Link href="/imprint">imprint</Link> page and the mechanics are on{' '}

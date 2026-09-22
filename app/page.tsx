@@ -3,7 +3,7 @@ import ClaimPanel from '@/components/ClaimPanel'
 import TodayRail from '@/components/TodayRail'
 import Board from '@/components/Board'
 import { Trophy } from '@/components/icons'
-import { getBoard, priceToLead, getTotals } from '@/lib/rank'
+import { getBoard, priceToLead, getTotalsByCategory } from '@/lib/rank'
 import { getRates } from '@/lib/fx'
 import { getDisplayCurrency } from '@/lib/session'
 import { CATEGORIES, MIN_FIRST_PAYMENT_MINOR } from '@/lib/config'
@@ -37,11 +37,12 @@ export default async function Page({ searchParams }: { searchParams: Promise<Sea
   // how many listings there are (the length) and what rank any amount buys.
   // That is two fewer round trips per render, which matters more than it looks
   // when the database is a continent away.
-  const [rows, totals] = await Promise.all([
+  const [rows, totalsByCategory] = await Promise.all([
     getBoard({ scope, category, limit: PAGE_SIZE, offset: (page - 1) * PAGE_SIZE }),
-    getTotals(category),
+    getTotalsByCategory(),
   ])
 
+  const totals = totalsByCategory[category ?? 'all'] ?? []
   const total = totals.length
   const nextPrice = priceToLead(totals[0] ?? 0, 0)
   const rate = rates[currency] ?? 1
@@ -83,11 +84,10 @@ export default async function Page({ searchParams }: { searchParams: Promise<Sea
       </div>
 
       <ClaimPanel
-        suggestedMinor={nextPrice}
         minMinor={MIN_FIRST_PAYMENT_MINOR}
         currency={currency}
         rate={rate}
-        totals={totals}
+        totalsByCategory={totalsByCategory}
       />
 
       {sp.claimed && (

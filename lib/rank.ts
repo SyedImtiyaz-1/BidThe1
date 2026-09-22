@@ -193,6 +193,33 @@ export async function projectedRank(
  * given amount would buy. Just the numbers, and they are all public on the
  * board anyway, so nothing is disclosed that a reader cannot already see.
  */
+/**
+ * Totals for every category at once, each sorted high to low, plus an `all`
+ * bucket.
+ *
+ * The hero answers "what rank does this amount buy" on every keystroke, and it
+ * answers it for the category in the dropdown, not the whole board. That is
+ * one array per category. Fetching them in one pass and partitioning in
+ * memory costs a single round trip; fetching them per category costs nine.
+ */
+export async function getTotalsByCategory(limit = 5000): Promise<Record<string, number[]>> {
+  const rows = await q<{ category: string; total_minor: string }>(
+    `select category, total_minor from listings
+      where status = 'live' and total_minor > 0
+      order by total_minor desc
+      limit $1`,
+    [limit],
+  )
+  // The query is already sorted, so every partition comes out sorted too.
+  const out: Record<string, number[]> = { all: [] }
+  for (const r of rows) {
+    const v = num(r.total_minor)
+    out.all.push(v)
+    ;(out[r.category] ??= []).push(v)
+  }
+  return out
+}
+
 export async function getTotals(category?: string, limit = 5000): Promise<number[]> {
   const cat = category && category !== 'all' ? category : null
   const rows = await q<{ total_minor: string }>(
@@ -294,4 +321,96 @@ async function readStats(): Promise<Stats> {
     listings: num(r?.listings),
     totalMinor: num(r?.total_minor),
   }
+}
+
+export type CategoryTop = { slug: string; title: string; amountMinor: number }
+export type CategoryBoard = {
+  slug: string
+  listings: number
+  claims: number
+  lastClaimAt: string | null
+  totalMinor: number
+  top: CategoryTop[]
+}
+
+/**
+ * Every category as its own small board: how many listings, how many claims,
+ * when the last one landed, and the three holding the top.
+ *
+ * Scoped, because "most active" means nothing on an all-time table that one
+ * large payment locks forever. Today's figures are the ones that move.
+ *
+ * Two queries rather than one: the aggregates group over payments and the top
+ * three window over listings, and forcing those into a single statement costs
+ * more in a cross join than it saves in a round trip.
+ */
+export async function getCategoryBoards(
+  scope: 'all' | 'today' = 'all',
+  perCategory = 3,
+): Promise<CategoryBoard[]> {
+  const today = scope === 'today'
+
+  const [tops, acts] = await Promise.all([
+    q<Record<string, any>>(
+      `with amt as (
+         select l.id, l.category, l.slug, l.title, l.first_reached_at,
+                case when $1::bool then coalesce((
+                       select sum(p.amount_minor) from payments p
+                        where p.listing_id = l.id and p.status = 'confirmed'
+                          and p.created_at >= (date_trunc('day', now() at time zone 'utc') at time zone 'utc')
+                     ), 0)
+                     else l.total_minor end as amount
+           from listings l
+          where l.status = 'live'
+       ),
+       ranked as (
+         select *, row_number() over (
+                     partition by category order by amount desc, first_reached_at asc
+                   ) as rn
+           from amt where amount > 0
+       )
+       select category, slug, title, amount, rn,
+              count(*) over (partition by category)::int as listings,
+              sum(amount) over (partition by category)   as cat_total
+         from ranked
+        where rn <= $2
+        order by category, rn`,
+      [today, perCategory],
+    ),
+    q<Record<string, any>>(
+      `select l.category,
+              count(*)::int      as claims,
+              max(p.created_at)  as last_at
+         from payments p
+         join listings l on l.id = p.listing_id
+        where p.status = 'confirmed'
+          and l.status = 'live'
+          and (not $1::bool or p.created_at >= (date_trunc('day', now() at time zone 'utc') at time zone 'utc'))
+        group by l.category`,
+      [today],
+    ),
+  ])
+
+  const act = new Map(acts.map((r) => [r.category as string, r]))
+  const out = new Map<string, CategoryBoard>()
+
+  for (const r of tops) {
+    const slug = r.category as string
+    let entry = out.get(slug)
+    if (!entry) {
+      const a = act.get(slug)
+      entry = {
+        slug,
+        listings: num(r.listings),
+        claims: a ? num(a.claims) : 0,
+        lastClaimAt: a?.last_at ? new Date(a.last_at).toISOString() : null,
+        totalMinor: num(r.cat_total),
+        top: [],
+      }
+      out.set(slug, entry)
+    }
+    entry.top.push({ slug: r.slug, title: r.title, amountMinor: num(r.amount) })
+  }
+
+  return [...out.values()]
 }

@@ -35,8 +35,7 @@ export default function Footer() {
           <a href={`https://x.com/${BUSINESS.x}`} rel="noopener">@{BUSINESS.x}</a>
         </p>
         <p>
-          Grievance officer {BUSINESS.owner}, {BUSINESS.email}. Complaints acknowledged within 24
-          hours and resolved within 15 days.
+          Complaints acknowledged within 24 hours and resolved within 7 days.
         </p>
       </div>
     </footer>
