@@ -2,17 +2,13 @@ import Link from 'next/link'
 import { SITE_DOMAIN, BUSINESS } from '@/lib/config'
 import { one, num } from '@/lib/db'
 import { getStats, getLeader } from '@/lib/rank'
-import { getRates } from '@/lib/fx'
-import { getDisplayCurrency } from '@/lib/session'
-import { convertFromBase, formatMoney } from '@/lib/money'
+import { formatMoney } from '@/lib/money'
 
 export const dynamic = 'force-dynamic'
 export const metadata = { title: 'About' }
 
 export default async function Page() {
-  const [stats, leader, { rates }, currency] = await Promise.all([
-    getStats(), getLeader(), getRates(), getDisplayCurrency(),
-  ])
+  const [stats, leader] = await Promise.all([getStats(), getLeader()])
   const extra = await one<Record<string, any>>(
     `select
        (select coalesce(sum(click_count), 0) from listings where status = 'live') as clicks,
@@ -26,8 +22,7 @@ export default async function Page() {
                                                                                   as today_minor`,
   )
 
-  const rate = rates[currency] ?? 1
-  const money = (m: number) => formatMoney(convertFromBase(m, currency, rate), currency)
+  const money = (m: number) => formatMoney(m)
 
   const cells: [string, string, string?][] = [
     [money(stats.totalMinor), 'paid in total'],
@@ -68,8 +63,7 @@ export default async function Page() {
       <h2>What makes it different</h2>
       <p>
         Every row shows the money paid divided by the visitors delivered, so a rank is a
-        measurable ad buy rather than a vanity purchase. Prices display in fifteen currencies,
-        and there is a board for every UTC day, not just an all-time table that one large payment
+        measurable ad buy rather than a vanity purchase. There is a board for every UTC day, not just an all-time table that one large payment
         can lock forever.
       </p>
 

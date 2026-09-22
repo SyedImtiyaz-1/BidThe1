@@ -1,31 +1,23 @@
 import Link from 'next/link'
 import Money from './Money'
 import type { BoardRow } from '@/lib/rank'
-import { convertFromBase, unitsToBeat, unitsToBase, unitMinor } from '@/lib/money'
+import { unitsToBeat, unitsToBase } from '@/lib/money'
 import { CATEGORIES, MIN_FIRST_PAYMENT_MINOR } from '@/lib/config'
 import ClaimTab from './ClaimTab'
 import CategoryIcon from './CategoryIcon'
 import { ArrowRight, Sparkle } from './icons'
-import type { Rates } from '@/lib/fx'
 
 const CATEGORY_LABEL = new Map<string, string>(CATEGORIES.map((c) => [c.slug, c.label]))
 
 export default function Board({
   rows,
   scope,
-  currency,
-  rates,
-  nextPrice,
   justClaimed,
 }: {
   rows: BoardRow[]
   scope: 'all' | 'today' | 'day'
-  currency: string
-  rates: Rates
-  nextPrice: number
   justClaimed?: string
 }) {
-  const rate = rates[currency] ?? 1
 
   if (rows.length === 0) {
     return (
@@ -46,10 +38,8 @@ export default function Board({
           const podium = r.rank <= 3
 
           // Ties lose, so taking a rank means exceeding what that listing
-          // holds, not matching it. Priced in whole units of the currency on
-          // screen, because a row showing $433 has to be beaten by $434: a ₹1
-          // step is about a cent, and a cent is invisible here.
-          const takeUnits = unitsToBeat(shown, currency, rate, MIN_FIRST_PAYMENT_MINOR)
+          // holds, not matching it: a row showing $433 is taken with $434.
+          const takeUnits = unitsToBeat(shown, MIN_FIRST_PAYMENT_MINOR)
           return (
             <li
               key={r.id}
@@ -59,11 +49,7 @@ export default function Board({
               }
               style={{ viewTransitionName: `row-${r.slug}` }}
             >
-              <ClaimTab
-                baseMinor={unitsToBase(takeUnits, currency, rate)}
-                displayMinor={takeUnits * unitMinor(currency)}
-                currency={currency}
-              />
+              <ClaimTab minor={unitsToBase(takeUnits)} />
 
               <span className="rank num">#{r.rank}</span>
 
@@ -80,7 +66,7 @@ export default function Board({
                     {r.title}
                   </a>
                   <span className="row-money">
-                    <Money minor={convertFromBase(shown, currency, rate)} currency={currency} />
+                    <Money minor={shown} />
                   </span>
                 </div>
                 {r.tagline && <div className="row-tag">{r.tagline}</div>}

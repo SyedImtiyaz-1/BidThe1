@@ -20,8 +20,8 @@ export default function Page() {
 
       <h2>Do payments stack?</h2>
       <p>
-        Yes. Paying again adds to your total rather than replacing it, so a listing at ₹500 needs
-        ₹501 to pass a listing at ₹1,000.
+        Yes. Paying again adds to your total rather than replacing it, so a listing at $500 needs
+        $501 to pass a listing at $1,000.
       </p>
 
       <h2>What happens when someone pays more than me?</h2>
@@ -34,13 +34,6 @@ export default function Page() {
       <p>
         No. Outbound links carry <code>rel=&quot;sponsored nofollow&quot;</code>, because a link
         bought for money is a paid link. Buy this for the traffic, not for SEO.
-      </p>
-
-      <h2>Why is the price shown in my currency but charged in rupees?</h2>
-      <p>
-        The ladder runs in one currency so it cannot be gamed by switching the dropdown. Other
-        currencies are converted for display at a rate refreshed every six hours. The exact rupee
-        amount is on the confirmation screen before you pay.
       </p>
 
       <h2>Can I edit or remove my listing?</h2>

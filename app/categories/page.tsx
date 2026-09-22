@@ -3,9 +3,7 @@ import Money from '@/components/Money'
 import { Trophy, Clock } from '@/components/icons'
 import CategoryIcon from '@/components/CategoryIcon'
 import { getCategoryBoards } from '@/lib/rank'
-import { getRates } from '@/lib/fx'
-import { getDisplayCurrency } from '@/lib/session'
-import { convertFromBase, unitsToBeat, unitMinor } from '@/lib/money'
+import { unitsToBeat, unitsToBase } from '@/lib/money'
 import { PICKABLE_CATEGORIES, MIN_FIRST_PAYMENT_MINOR } from '@/lib/config'
 import { ago } from '@/lib/time'
 
@@ -26,10 +24,7 @@ export default async function Page({
   const sp = await searchParams
   const scope: 'all' | 'today' = sp.scope === 'today' ? 'today' : 'all'
 
-  const [boards, { rates }, currency] = await Promise.all([
-    getCategoryBoards(scope), getRates(), getDisplayCurrency(),
-  ])
-  const rate = rates[currency] ?? 1
+  const boards = await getCategoryBoards(scope)
   const by = new Map(boards.map((b) => [b.slug, b]))
 
   // Hottest means claims first and recency second: a category with four claims
@@ -79,10 +74,7 @@ export default async function Page({
               )}
               {b.top[0] && (
                 <span className="hot-amt">
-                  <Money
-                    minor={convertFromBase(b.top[0].amountMinor, currency, rate)}
-                    currency={currency}
-                  />
+                  <Money minor={b.top[0].amountMinor} />
                 </span>
               )}
             </Link>
@@ -99,17 +91,15 @@ export default async function Page({
       <div className="cat-boards">
         {PICKABLE_CATEGORIES.map((c) => {
           const b = by.get(c.slug)
-          // What the next person pays to lead this category, in the currency
-          // on screen and one whole unit above the number printed above it.
-          const toLead = unitsToBeat(
-            b?.top[0]?.amountMinor ?? 0, currency, rate, MIN_FIRST_PAYMENT_MINOR,
-          )
+          // What the next person pays to lead this category, one dollar above
+          // the number printed above it.
+          const toLead = unitsToBeat(b?.top[0]?.amountMinor ?? 0, MIN_FIRST_PAYMENT_MINOR)
           return (
             <section key={c.slug} className="cat-board">
               <h2>
                 <Link href={`/?category=${c.slug}`}><CategoryIcon slug={c.slug} size={16} /> {c.label}</Link>
                 <span className="cat-board-take num">
-                  <Money minor={toLead * unitMinor(currency)} currency={currency} /> to lead
+                  <Money minor={unitsToBase(toLead)} /> to lead
                 </span>
               </h2>
 
@@ -127,10 +117,7 @@ export default async function Page({
                         {t.title}
                       </a>
                       <span className="cat-row-amt num">
-                        <Money
-                          minor={convertFromBase(t.amountMinor, currency, rate)}
-                          currency={currency}
-                        />
+                        <Money minor={t.amountMinor} />
                       </span>
                     </li>
                   ))}

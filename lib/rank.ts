@@ -166,8 +166,8 @@ export async function findListingByHost(host: string) {
 /**
  * What it costs to take the top, given what this listing has already paid.
  *
- * Top-ups accumulate, so a listing sitting at ₹500 with the leader at ₹1,000
- * pays ₹501 and not ₹1,001. Charging the full amount again is the single most
+ * Top-ups accumulate, so a listing sitting at $500 with the leader at $1,000
+ * pays $501 and not $1,001. Charging the full amount again is the single most
  * common way a clone of this mechanic makes returning customers feel cheated.
  */
 export function priceToLead(leaderTotalMinor: number, myTotalMinor: number): number {

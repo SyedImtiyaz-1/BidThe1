@@ -1,19 +1,14 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { SITE_NAME, BASE_CURRENCY } from '@/lib/config'
+import { SITE_NAME } from '@/lib/config'
 import { getStats } from '@/lib/rank'
-import { convertFromBase, formatMoney } from '@/lib/money'
-import { getRates } from '@/lib/fx'
-import { getDisplayCurrency } from '@/lib/session'
-import CurrencySelect from './CurrencySelect'
+import { formatMoney } from '@/lib/money'
 import ThemeToggle from './ThemeToggle'
 import MobileMenu from './MobileMenu'
 import { BarChart } from './icons'
 
 export default async function Nav() {
-  const [stats, currency, { rates }] = await Promise.all([
-    getStats(), getDisplayCurrency(), getRates(),
-  ])
+  const stats = await getStats()
 
   /**
    * Traffic counters only once there is traffic worth counting.
@@ -50,11 +45,7 @@ export default async function Nav() {
             <>
               <b>{stats.listings.toLocaleString('en-US')} listings</b>
               <span className="sep">·</span>
-              {formatMoney(
-                convertFromBase(stats.totalMinor, currency, rates[currency] ?? 1),
-                currency,
-              )}{' '}
-              on the board
+              {formatMoney(stats.totalMinor)} on the board
             </>
           )}
           <span className="sep">·</span>
@@ -68,7 +59,6 @@ export default async function Nav() {
             <Link href="/about">About</Link>
             <Link href="/rules">Rules</Link>
           </div>
-          <CurrencySelect value={currency} />
           <ThemeToggle />
           <MobileMenu />
         </div>

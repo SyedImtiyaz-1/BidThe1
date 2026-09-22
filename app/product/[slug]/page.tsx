@@ -8,9 +8,7 @@ import CopyLink from '@/components/CopyLink'
 import CategoryIcon from '@/components/CategoryIcon'
 import { Trophy, Clock, ExternalLink, LinkIcon, Bolt } from '@/components/icons'
 import { getListingDetail as loadDetail } from '@/lib/rank'
-import { getRates } from '@/lib/fx'
-import { getDisplayCurrency } from '@/lib/session'
-import { convertFromBase, formatMoney, unitsToBeat, unitMinor } from '@/lib/money'
+import { formatMoney, unitsToBeat, unitsToBase } from '@/lib/money'
 import { CATEGORIES, MIN_FIRST_PAYMENT_MINOR, SITE_DOMAIN, SITE_URL } from '@/lib/config'
 import { ago } from '@/lib/time'
 
@@ -41,7 +39,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params
   const d = await getListingDetail(slug)
   if (!d) return { title: 'Not found' }
-  const money = formatMoney(d.listing.total_minor, 'INR')
+  const money = formatMoney(d.listing.total_minor)
   const title = d.overall ? `${d.listing.title} · #${d.overall.rank} on ${SITE_DOMAIN}` : d.listing.title
   const description = standingSentence(d, money)
   return {
@@ -56,20 +54,15 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 
 export default async function Page({ params }: Params) {
   const { slug } = await params
-  const [d, { rates }, currency] = await Promise.all([
-    getListingDetail(slug), getRates(), getDisplayCurrency(),
-  ])
+  const d = await getListingDetail(slug)
   if (!d) notFound()
 
-  const rate = rates[currency] ?? 1
   const l = d.listing
   const cat = LABEL.get(l.category) ?? l.category
   const total = Number(l.total_minor)
-  const shown = (minor: number) => convertFromBase(minor, currency, rate)
-  const totalText = formatMoney(shown(total), currency)
-  const todayText = formatMoney(shown(d.todayMinor), currency)
-  const takeUnits = unitsToBeat(total, currency, rate, MIN_FIRST_PAYMENT_MINOR)
-  const takeText = formatMoney(takeUnits * unitMinor(currency), currency)
+  const totalText = formatMoney(total)
+  const todayText = formatMoney(d.todayMinor)
+  const takeText = formatMoney(unitsToBase(unitsToBeat(total, MIN_FIRST_PAYMENT_MINOR)))
   const clicks = Number(l.click_count)
   const url = `${SITE_URL}/product/${slug}`
 
@@ -165,7 +158,7 @@ export default async function Page({ params }: Params) {
         </div>
         <div className="product-money">
           <span className="stand-k">Paid</span>
-          <Money minor={shown(total)} currency={currency} />
+          <Money minor={total} />
         </div>
       </header>
 
@@ -204,7 +197,7 @@ export default async function Page({ params }: Params) {
               <li key={x.slug}>
                 <span className="cat-rank num">#{x.rank}</span>
                 <Link className="cat-row-title" href={`/product/${x.slug}`}>{x.title}</Link>
-                <span className="cat-row-amt num"><Money minor={shown(x.amountMinor)} currency={currency} /></span>
+                <span className="cat-row-amt num"><Money minor={x.amountMinor} /></span>
               </li>
             ))}
           </ol>

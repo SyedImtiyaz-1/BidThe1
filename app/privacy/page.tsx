@@ -19,7 +19,7 @@ export default function Page() {
           per hour and to count visitors. We do not store raw IP addresses and the hash cannot be
           reversed to one.
         </li>
-        <li>Two cookies that hold nothing but your chosen currency and light or dark theme.</li>
+        <li>One cookie that holds nothing but your light or dark theme choice.</li>
         <li>
           Product analytics: which pages were opened and in what order, the country and kind of
           device, tied to a random id kept in your browser. It tells us whether the board is

@@ -1,28 +1,27 @@
 /**
- * The ladder lives in exactly one currency. Everything else on the site is a
- * display conversion of these numbers. If this ever becomes two currencies,
- * the cheapest way to take #1 is to switch the dropdown to the weakest one.
+ * One currency, everywhere. Prices display in dollars, rank in dollars and are
+ * charged in dollars, so the number on screen is the number that ranks.
  */
-export const BASE_CURRENCY = 'INR'
+export const BASE_CURRENCY = 'USD'
 
-/** Smallest unit of the base currency. Paise for INR, cents for USD. */
+/** Smallest unit of the base currency. Cents. */
 export const BASE_MINOR_DIGITS = 2
 
-/** One rung. The client's rule: beat ₹1,000 with ₹1,001. */
+/** One rung. Beat $1,000 with $1,001. */
 export const STEP_MINOR = 100
 
 /**
- * Floor for any single payment. topapp.lol used a $1 floor and ended up with
- * 23 dead listings tied at the bottom of the board, so this is deliberately
- * not ₹1.
+ * Floor for any single payment. Not $1: the processor takes a percentage plus
+ * a fixed fee, and on a dollar the fee is most of the dollar. topapp.lol used
+ * a $1 floor and collected 23 dead listings tied at the bottom of the board.
  */
-export const MIN_PAYMENT_MINOR = 9900
+export const MIN_PAYMENT_MINOR = 500
 
 /** What a brand new listing must pay to appear at all. */
-export const MIN_FIRST_PAYMENT_MINOR = 9900
+export const MIN_FIRST_PAYMENT_MINOR = 500
 
-/** Ceiling on a single payment, so a typo cannot become a five-crore charge. */
-export const MAX_PAYMENT_MINOR = 50_000_000
+/** Ceiling on a single payment, so a typo cannot become a $500,000 charge. */
+export const MAX_PAYMENT_MINOR = 5_000_000
 
 export const SITE_NAME = process.env.NEXT_PUBLIC_SITE_NAME || 'coolapp'
 export const SITE_DOMAIN = `${SITE_NAME}.lol`
@@ -64,19 +63,3 @@ export const CATEGORIES = [
 ] as const
 
 export const PICKABLE_CATEGORIES = CATEGORIES.filter((c) => c.slug !== 'all')
-
-/**
- * Display currencies. Charging always happens in BASE_CURRENCY and the UI says
- * so, because a converted price that differs from the amount actually debited
- * is drip pricing under the CCPA dark-pattern guidelines.
- */
-export const DISPLAY_CURRENCIES = [
-  'INR', 'USD', 'EUR', 'GBP', 'AED', 'SGD', 'AUD',
-  'CAD', 'JPY', 'BRL', 'NGN', 'PHP', 'ZAR', 'CHF', 'SEK',
-] as const
-
-export type DisplayCurrency = (typeof DISPLAY_CURRENCIES)[number]
-
-export function isDisplayCurrency(v: string | undefined): v is DisplayCurrency {
-  return !!v && (DISPLAY_CURRENCIES as readonly string[]).includes(v)
-}

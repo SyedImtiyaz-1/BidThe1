@@ -2,18 +2,9 @@ import Link from 'next/link'
 import Money from './Money'
 import { Trophy } from './icons'
 import { getBoard } from '@/lib/rank'
-import { convertFromBase } from '@/lib/money'
-import type { Rates } from '@/lib/fx'
 
-export default async function TodayRail({
-  currency,
-  rates,
-}: {
-  currency: string
-  rates: Rates
-}) {
+export default async function TodayRail() {
   const rows = await getBoard({ scope: 'today', limit: 10 })
-  const rate = rates[currency] ?? 1
 
   return (
     <aside>
@@ -43,7 +34,7 @@ export default async function TodayRail({
             />
             <span className="rail-name">{r.title}</span>
             <span className="rail-amt">
-              <Money minor={convertFromBase(r.today_minor, currency, rate)} currency={currency} />
+              <Money minor={r.today_minor} />
             </span>
           </Link>
         ))

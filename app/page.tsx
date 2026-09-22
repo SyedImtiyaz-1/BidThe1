@@ -6,8 +6,6 @@ import { Trophy, GridPlus, Clock } from '@/components/icons'
 import CategoryIcon from '@/components/CategoryIcon'
 import { getBoard, priceToLead, getTotalsByCategory, findListingBySlugAny } from '@/lib/rank'
 import { reconcileDodoPayment, reconcileListing, type Reconciled } from '@/lib/payments'
-import { getRates } from '@/lib/fx'
-import { getDisplayCurrency } from '@/lib/session'
 import { CATEGORIES, MIN_FIRST_PAYMENT_MINOR } from '@/lib/config'
 
 export const dynamic = 'force-dynamic'
@@ -39,8 +37,6 @@ export default async function Page({ searchParams }: { searchParams: Promise<Sea
   const scope: 'all' | 'today' = sp.scope === 'today' ? 'today' : 'all'
   const category = sp.category && sp.category !== 'all' ? sp.category : undefined
   const page = Math.max(1, Number(sp.page) || 1)
-
-  const [{ rates }, currency] = await Promise.all([getRates(), getDisplayCurrency()])
 
   /**
    * Someone just came back from checkout. Before drawing the board, ask Dodo
@@ -74,7 +70,6 @@ export default async function Page({ searchParams }: { searchParams: Promise<Sea
   const totals = totalsByCategory[category ?? 'all'] ?? []
   const total = totals.length
   const nextPrice = priceToLead(totals[0] ?? 0, 0)
-  const rate = rates[currency] ?? 1
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
   const from = total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1
   const to = Math.min(page * PAGE_SIZE, total)
@@ -124,8 +119,6 @@ export default async function Page({ searchParams }: { searchParams: Promise<Sea
       <ClaimPanel
         initialCategory={category ?? ''}
         minMinor={MIN_FIRST_PAYMENT_MINOR}
-        currency={currency}
-        rate={rate}
         totalsByCategory={totalsByCategory}
       />
 
@@ -141,14 +134,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Sea
 
       <div className="cols">
         <div>
-          <Board
-            rows={rows}
-            scope={scope}
-            currency={currency}
-            rates={rates}
-            nextPrice={nextPrice}
-            justClaimed={sp.claimed}
-          />
+          <Board rows={rows} scope={scope} justClaimed={sp.claimed} />
 
           {totalPages > 1 && (
             <>
@@ -176,7 +162,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Sea
           )}
         </div>
 
-        <TodayRail currency={currency} rates={rates} />
+        <TodayRail />
       </div>
     </div>
   )

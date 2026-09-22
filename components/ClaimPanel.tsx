@@ -4,11 +4,8 @@ import { useEffect, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import posthog from 'posthog-js'
 import { Plus, Minus, Bolt } from './icons'
-import { PICKABLE_CATEGORIES, BASE_CURRENCY, MAX_PAYMENT_MINOR } from '@/lib/config'
-import {
-  formatMoney, moneyParts, unitMinor, unitsToBase, unitsToBeat, baseToUnits, baseToUnitsDown,
-  displayUnits,
-} from '@/lib/money'
+import { PICKABLE_CATEGORIES, MAX_PAYMENT_MINOR } from '@/lib/config'
+import { formatMoney, moneyParts, unitMinor, unitsToBase, unitsToBeat, displayUnits } from '@/lib/money'
 
 type ClaimResult = {
   listingId: string
@@ -41,15 +38,11 @@ function rankFor(amountMinor: number, totals: number[]): number {
 export default function ClaimPanel({
   initialCategory,
   minMinor,
-  currency,
-  rate,
   totalsByCategory,
 }: {
   /** The category in the filter bar, or '' for the whole board. */
   initialCategory: string
   minMinor: number
-  currency: string
-  rate: number
   totalsByCategory: Record<string, number[]>
 }) {
   const router = useRouter()
@@ -69,18 +62,12 @@ export default function ClaimPanel({
   const totals = (category ? totalsByCategory[category] : totalsByCategory.all) ?? []
   const leader = totals[0] ?? 0
 
-  /**
-   * The amount is held in whole units of the currency on screen, not in base
-   * paise. Holding base and converting for display loses the step: ₹1 is about
-   * one US cent, and the board prints whole dollars, so the number stops
-   * moving while the rank underneath it keeps changing. Whole units on screen
-   * means what you read is what ranks.
-   */
-  const lowest = baseToUnits(minMinor, currency, rate)
-  const highest = baseToUnitsDown(MAX_PAYMENT_MINOR, currency, rate)
+  /** Whole dollars. The number on screen is the number that ranks. */
+  const lowest = Math.ceil(minMinor / unitMinor())
+  const highest = Math.floor(MAX_PAYMENT_MINOR / unitMinor())
   const clamp = (u: number) => Math.min(highest, Math.max(lowest, u))
 
-  const [units, setUnits] = useState(() => unitsToBeat(leader, currency, rate, minMinor))
+  const [units, setUnits] = useState(() => unitsToBeat(leader, minMinor))
   const [touched, setTouched] = useState(false)
 
   /**
@@ -94,18 +81,11 @@ export default function ClaimPanel({
     setTouched(false)
   }, [initialCategory])
 
-  const amount = unitsToBase(units, currency, rate)
-  const parts = moneyParts(units * unitMinor(currency), currency)
+  const amount = unitsToBase(units)
+  const parts = moneyParts(amount)
 
-  /**
-   * Rank is judged in the units on screen. Two amounts that print the same
-   * number must not rank differently, whatever the paise underneath say: a
-   * leader showing $878 is beaten by $879 and tied by $878, and a tie loses.
-   * The charge for $879 exceeds the leader's rupees by construction, so the
-   * board can only agree with this or do better, never worse.
-   */
-  const heroRank = rankFor(units, totals.map((t) => displayUnits(t, currency, rate)))
-  const converted = currency !== BASE_CURRENCY
+  // Ties lose: a leader on $878 is beaten by $879 and tied by $878.
+  const heroRank = rankFor(units, totals.map(displayUnits))
 
   const set = (u: number) => { setTyping(null); setTouched(true); setUnits(clamp(u)) }
 
@@ -116,35 +96,19 @@ export default function ClaimPanel({
    * typed or stepped, it is theirs and nothing moves it.
    */
   useEffect(() => {
-    if (!touched) setUnits(unitsToBeat(leader, currency, rate, minMinor))
-  }, [leader, currency, rate, minMinor, touched])
-
-  /**
-   * The currency picker refreshes the route rather than remounting, so this
-   * state survives the switch and has to be re-expressed. Convert through the
-   * old rate, then round to whole units of the new currency.
-   */
-  const shownIn = useRef({ currency, rate })
-  useEffect(() => {
-    const prev = shownIn.current
-    if (prev.currency === currency && prev.rate === rate) return
-    shownIn.current = { currency, rate }
-    if (touched) {
-      setUnits(baseToUnits(unitsToBase(units, prev.currency, prev.rate), currency, rate))
-    }
-  }, [currency, rate, units, touched])
+    if (!touched) setUnits(unitsToBeat(leader, minMinor))
+  }, [leader, minMinor, touched])
 
   /** A "claim this rank" badge on the board sets the amount here. */
   useEffect(() => {
     const onPick = (e: Event) => {
-      const d = (e as CustomEvent<{ displayMinor: number; currency: string }>).detail
-      if (!d || d.currency !== currency) return
-      // Exact integer division: the badge priced in the same units this holds.
-      set(Math.round(d.displayMinor / unitMinor(currency)))
+      const minor = (e as CustomEvent<number>).detail
+      if (!Number.isFinite(minor)) return
+      set(Math.round(minor / unitMinor()))
     }
     window.addEventListener('claim-price', onPick)
     return () => window.removeEventListener('claim-price', onPick)
-  }, [currency, rate, lowest, highest])
+  }, [lowest, highest])
 
   // router.refresh() returns nothing and commits later, so a view transition
   // that wraps it would finish before React re-rendered and animate nothing.
@@ -191,7 +155,7 @@ export default function ClaimPanel({
       // The funnel worth measuring: board seen -> price set -> money taken.
       posthog.capture?.('claim_started', {
         category, rank_projected: json.rankProjected,
-        amount_minor: json.amountMinor, currency,
+        amount_minor: json.amountMinor,
       })
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Something went wrong.')
@@ -275,7 +239,7 @@ export default function ClaimPanel({
                 size={1}
                 inputMode="numeric"
                 autoComplete="off"
-                aria-label={`Amount in ${currency}`}
+                aria-label="Amount in US dollars"
                 onFocus={(e) => {
                   setTyping(parts.amount.replace(/[^0-9]/g, ''))
                   requestAnimationFrame(() => e.target.select())
@@ -331,20 +295,9 @@ export default function ClaimPanel({
           </button>
         </div>
 
-        {/* Everything here is quoted in the currency on screen. The one
-            exception is the charge itself, which is stated separately and in
-            full, because a converted price that differs from the amount
-            actually debited is drip pricing under the CCPA guidelines. */}
         <p className="step-note num">
-          {formatMoney(lowest * unitMinor(currency), currency)} minimum,{' '}
-          {formatMoney(unitMinor(currency), currency)} steps
+          {formatMoney(unitsToBase(lowest))} minimum, {formatMoney(unitMinor())} steps
         </p>
-        {converted && (
-          <p className="step-note charge-note num">
-            You are charged {formatMoney(amount, BASE_CURRENCY, { decimals: true })} in{' '}
-            {BASE_CURRENCY}
-          </p>
-        )}
 
         {error && !claim && <p className="err" style={{ marginTop: 10 }}>{error}</p>}
       </div>
@@ -367,8 +320,8 @@ export default function ClaimPanel({
                 </div>
                 <div style={{ textAlign: 'right' }}>
                   <span className="lbl">Charged now</span>
-                  <span className="val num">{formatMoney(claim.amountMinor, BASE_CURRENCY, { decimals: true })}</span>
-                  <div className="modal-note">GST included</div>
+                  <span className="val num">{formatMoney(claim.amountMinor, { decimals: true })}</span>
+                  <div className="modal-note">Tax added at checkout</div>
                 </div>
               </div>
 

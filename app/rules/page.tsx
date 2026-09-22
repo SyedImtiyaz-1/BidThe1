@@ -1,12 +1,12 @@
-import { SITE_DOMAIN, MIN_FIRST_PAYMENT_MINOR, MIN_PAYMENT_MINOR, STEP_MINOR, BASE_CURRENCY, BUSINESS } from '@/lib/config'
+import { SITE_DOMAIN, MIN_FIRST_PAYMENT_MINOR, MIN_PAYMENT_MINOR, STEP_MINOR, BUSINESS } from '@/lib/config'
 import { formatMoney } from '@/lib/money'
 
 export const metadata = { title: 'Rules' }
 
 export default function Page() {
-  const first = formatMoney(MIN_FIRST_PAYMENT_MINOR, BASE_CURRENCY)
-  const min = formatMoney(MIN_PAYMENT_MINOR, BASE_CURRENCY)
-  const step = formatMoney(STEP_MINOR, BASE_CURRENCY)
+  const first = formatMoney(MIN_FIRST_PAYMENT_MINOR)
+  const min = formatMoney(MIN_PAYMENT_MINOR)
+  const step = formatMoney(STEP_MINOR)
 
   return (
     <div className="wrap prose">
@@ -47,8 +47,8 @@ export default function Page() {
         </li>
         <li>
           Payments accumulate. Paying again adds to your total rather than replacing it, and
-          checkout charges only the difference. A listing at ₹500 needs ₹501 to pass a listing at
-          ₹1,000, not ₹1,001.
+          checkout charges only the difference. A listing at $500 needs $501 to pass a listing at
+          $1,000, not $1,001.
         </li>
         <li>
           To pass a listing you must exceed its total. Equal totals keep the order they were
@@ -90,8 +90,8 @@ export default function Page() {
 
       <h2>Currency</h2>
       <p>
-        Prices display in fifteen currencies, converted at a rate refreshed every six hours. That
-        is display only. The ladder runs in rupees and you are charged in rupees, in the exact
+        Every price on this site is in US dollars: what is displayed, what ranks and what you
+        are charged are one number. The exact
         amount shown on the confirmation screen before you pay.
       </p>
 

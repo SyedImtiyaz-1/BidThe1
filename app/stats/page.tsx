@@ -1,34 +1,27 @@
 import { one, num } from '@/lib/db'
 import { getStats } from '@/lib/rank'
-import { getRates } from '@/lib/fx'
-import { getDisplayCurrency } from '@/lib/session'
-import { convertFromBase, formatMoney } from '@/lib/money'
+import { formatMoney } from '@/lib/money'
 
 export const dynamic = 'force-dynamic'
 export const metadata = { title: 'Live stats' }
 
 export default async function Page() {
-  const [stats, { rates }, currency] = await Promise.all([
-    getStats(),
-    getRates(),
-    getDisplayCurrency(),
-  ])
+  const stats = await getStats()
   const extra = await one<Record<string, any>>(
     `select
        (select coalesce(sum(click_count), 0) from listings where status = 'live') as clicks,
        (select count(*)::int from payments where status = 'confirmed')            as payments`,
   )
 
-  const rate = rates[currency] ?? 1
   const clicks = num(extra?.clicks)
   const perClick = clicks > 0 ? Math.round(stats.totalMinor / clicks) : 0
 
   const cells: [string, string][] = [
     ['Listings live', stats.listings.toLocaleString('en-US')],
-    ['Paid in total', formatMoney(convertFromBase(stats.totalMinor, currency, rate), currency)],
+    ['Paid in total', formatMoney(stats.totalMinor)],
     ['Payments taken', num(extra?.payments).toLocaleString('en-US')],
     ['Clicks delivered', clicks.toLocaleString('en-US')],
-    ['Average per click', perClick > 0 ? formatMoney(convertFromBase(perClick, currency, rate), currency, { decimals: true }) : '—'],
+    ['Average per click', perClick > 0 ? formatMoney(perClick, { decimals: true }) : '—'],
     ['Online now', stats.online.toLocaleString('en-US')],
     ['Visitors today', stats.visitorsToday.toLocaleString('en-US')],
   ]
@@ -53,8 +46,8 @@ export default async function Page() {
       <p>
         Online means sessions active in the last five minutes. Visitors today means unique
         sessions since 00:00 UTC. Clicks exclude known crawlers and count once per visitor per
-        listing per hour. Amounts are shown in {currency}, converted from rupees at today&rsquo;s
-        rate.
+        listing per hour. Every amount is in US dollars, which is what the board ranks and
+        charges in.
       </p>
     </div>
   )

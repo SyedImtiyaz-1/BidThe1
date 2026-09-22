@@ -3,8 +3,8 @@
 A paid leaderboard. Anyone pastes a link, pays, and appears at the rank their money buys.
 The only way past someone is to pay more than they did.
 
-Modelled on outbid.lol and topapp.lol, with three things they do not have: display in fifteen
-currencies, a cost-per-click figure on every row, and a daily board alongside the all-time one.
+Modelled on outbid.lol and topapp.lol, with two things they do not have: a product page per
+listing carrying its standing on every board, and a daily board alongside the all-time one.
 
 ## Run it
 
@@ -36,10 +36,9 @@ Copy `.env.example` to `.env.local`. Every value is optional in development.
 
 ## How the money works
 
-One currency runs the ladder and every other currency is a label on top of it. Amounts are
-integer paise in `amount_minor`, the step between positions is ₹1, and the minimum payment is
-₹99. The dropdown converts for display only and the buyer is always charged in rupees, which
-the confirm dialog states before anything happens.
+One currency, everywhere. Amounts are integer cents in `amount_minor`, the step between
+positions is $1 and the minimum payment is $5. What is displayed, what ranks and what is
+charged are the same number, so there is no conversion layer to keep honest.
 
 Rank is never stored. It is `row_number() over (order by total_minor desc, first_reached_at asc)`
 computed on read, which is why two people paying in the same second cannot collide: there is no
@@ -59,8 +58,7 @@ in both paths; nothing in the query string moves money.
 
 The ledger credits the amount carried in the checkout's `metadata`, never the total Dodo
 reports back. Dodo is a merchant of record and may settle in another currency, in which case
-its reported total is in that currency's minor unit. Treating USD cents as paise would inflate
-a rank by roughly 85 times.
+its reported total is in that currency's minor unit rather than in cents.
 
 ## Before taking real money
 
@@ -86,9 +84,8 @@ a rank by roughly 85 times.
       address, GSTIN, grievance officer. Payment providers ask for these pages during review,
       and the disclosure duties are real regardless, so this is a gating dependency rather
       than polish.
-- [ ] Decide whether displayed prices include GST at 18% and say so on the confirm dialog.
-      Dodo is a merchant of record, so it handles the tax collection, but the number on the
-      screen still has to be the number that gets debited.
+- [ ] Confirm Dodo will settle this merchant in USD. `billing_currency` is USD, and an
+      account only approved for INR will reject every checkout.
 - [ ] An empty board is the honest one. Every listing on it was paid for; the empty state
       sells the first spot at the minimum rather than showing invented rivals.
 

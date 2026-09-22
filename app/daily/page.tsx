@@ -1,8 +1,6 @@
 import Link from 'next/link'
 import { getDays } from '@/lib/rank'
-import { getRates } from '@/lib/fx'
-import { getDisplayCurrency } from '@/lib/session'
-import { convertFromBase, formatMoney } from '@/lib/money'
+import { formatMoney } from '@/lib/money'
 
 export const dynamic = 'force-dynamic'
 export const metadata = { title: 'Daily boards' }
@@ -15,10 +13,7 @@ function label(day: string) {
 }
 
 export default async function Page() {
-  const [days, { rates }, currency] = await Promise.all([
-    getDays(), getRates(), getDisplayCurrency(),
-  ])
-  const rate = rates[currency] ?? 1
+  const days = await getDays()
   const today = new Date().toISOString().slice(0, 10)
 
   return (
@@ -45,7 +40,7 @@ export default async function Page() {
                 {d.payments} {d.payments === 1 ? 'payment' : 'payments'}
               </span>
               <span className="day-total num">
-                {formatMoney(convertFromBase(d.totalMinor, currency, rate), currency)}
+                {formatMoney(d.totalMinor)}
               </span>
             </Link>
           ))}
