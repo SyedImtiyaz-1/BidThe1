@@ -125,7 +125,9 @@ button, input, select { font: inherit; color: inherit; }
   align-items: center;
 }
 .wordmark .mark {
-  margin-right: 9px;
+  /* The file carries about 6% transparent padding of its own, so the visual
+     gap runs wider than this number. */
+  margin-right: 5px;
   width: 26px;
   height: 26px;
   display: inline-block;
