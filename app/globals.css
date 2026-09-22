@@ -379,9 +379,11 @@ button, input, select { font: inherit; color: inherit; }
   align-items: start;
 }
 
-/* Paid-placement disclosure. Directly above the first listing, at listing type
-   size. Not the footer and not behind an icon: EU UCPD Annex I point 11a
-   blacklists undisclosed paid ranking with no consumer-harm test attached. */
+/* --- ask ------------------------------------------------------------------ */
+
+.ask-frame { display: block; border: 0; border-radius: 12px; margin: 18px 0 10px; background: var(--paper-2); }
+.ask-note { font-size: 13px; color: var(--ink-3); }
+
 /* --- board ---------------------------------------------------------------- */
 
 .board { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }

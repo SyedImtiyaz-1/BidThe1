@@ -4,6 +4,7 @@ import { SITE_DOMAIN, BUSINESS } from '@/lib/config'
 const LINKS = [
   ['/rules', 'Rules'],
   ['/faq', 'FAQ'],
+  ['/ask', 'Ask'],
   ['/terms', 'Terms'],
   ['/privacy', 'Privacy'],
   ['/imprint', 'Imprint'],

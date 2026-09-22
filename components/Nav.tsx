@@ -64,6 +64,7 @@ export default async function Nav() {
             <Link href="/categories">Categories</Link>
             <Link href="/about">About</Link>
             <Link href="/rules">Rules</Link>
+            <Link href="/ask">Ask</Link>
           </div>
           <CurrencySelect value={currency} />
           <ThemeToggle />
