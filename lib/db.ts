@@ -1,4 +1,4 @@
-import { SCHEMA_SQL } from './schema'
+import { SCHEMA_SQL, SCHEMA_VERSION } from './schema'
 
 export type Row = Record<string, any>
 
@@ -61,16 +61,24 @@ async function connect(): Promise<Db> {
  * extended query protocol, so when it does run it runs one statement at a time.
  */
 async function bootstrap(db: Db) {
-  const [row] = await db.query<{ t: string | null }>(
-    `select to_regclass('public.listings')::text as t`,
-  )
-  if (row?.t) return
+  // One cheap read on a cold start. Running the whole script every time cost a
+  // statement timeout; never running it again meant a new column could not
+  // reach a database that already had the tables. The version decides.
+  const [row] = await db
+    .query<{ v: number | null }>(`select version as v from schema_meta where id = 1`)
+    .catch(() => [undefined])
+  if (row?.v != null && Number(row.v) >= SCHEMA_VERSION) return
 
   for (const stmt of SCHEMA_SQL.split(';')) {
     // Skip chunks that are only a comment, which the split leaves behind.
     const body = stmt.split('\n').filter((l) => !l.trim().startsWith('--')).join('\n')
     if (body.trim()) await db.query(stmt)
   }
+  await db.query(
+    `insert into schema_meta (id, version) values (1, $1)
+       on conflict (id) do update set version = excluded.version`,
+    [SCHEMA_VERSION],
+  )
 }
 
 declare global {

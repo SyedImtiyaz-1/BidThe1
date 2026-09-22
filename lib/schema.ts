@@ -1,8 +1,21 @@
 /**
- * One idempotent DDL script, run on first connection. No migration files: this
- * is a greenfield build and `create table if not exists` is honest about it.
+ * One idempotent DDL script. No migration files: every statement is written to
+ * be safe to re-run, so applying it twice is a no-op.
+ *
+ * Bump SCHEMA_VERSION whenever a statement is added. `bootstrap` records the
+ * version it last applied and skips the whole script when it matches, which
+ * keeps cold starts to a single cheap read; without the bump the new statement
+ * would never run against a database that already has the tables.
  */
+export const SCHEMA_VERSION = 2
+
 export const SCHEMA_SQL = `
+create table if not exists schema_meta (
+  id      int primary key default 1,
+  version int not null default 0
+);
+insert into schema_meta (id, version) values (1, 0) on conflict (id) do nothing;
+
 create table if not exists listings (
   id               uuid primary key default gen_random_uuid(),
   slug             text not null unique,
@@ -31,6 +44,14 @@ create index if not exists listings_host_idx on listings (host);
 alter table listings add column if not exists listing_key text;
 update listings set listing_key = host where listing_key is null;
 create unique index if not exists listings_key_idx on listings (listing_key);
+
+-- What sort of thing this is. Derived from the host at creation rather than
+-- read back from it every query, so a listing keeps its kind even if the host
+-- it was submitted under changes.
+alter table listings add column if not exists kind text not null default 'website';
+update listings set kind = 'app'
+ where kind <> 'app' and host in ('apps.apple.com', 'play.google.com');
+create index if not exists listings_kind_idx on listings (kind, total_minor desc);
 
 create table if not exists payments (
   id                uuid primary key default gen_random_uuid(),

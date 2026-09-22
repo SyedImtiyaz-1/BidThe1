@@ -61,11 +61,11 @@ export async function POST(req: Request) {
     // same product returns the existing row instead of failing the request.
     listing = await one<Record<string, any>>(
       `insert into listings
-         (listing_key, slug, url, host, title, tagline, icon_url, category, status)
-       values ($1, $2, $3, $4, $5, $6, $7, $8, 'pending')
+         (listing_key, slug, url, host, title, tagline, icon_url, category, kind, status)
+       values ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'pending')
        on conflict (listing_key) do update set url = listings.url
        returning *`,
-      [meta.key, slug, meta.url, meta.host, meta.title, meta.tagline, meta.iconUrl, category],
+      [meta.key, slug, meta.url, meta.host, meta.title, meta.tagline, meta.iconUrl, category, meta.kind],
     )
   }
 

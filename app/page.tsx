@@ -2,7 +2,7 @@ import Link from 'next/link'
 import ClaimPanel from '@/components/ClaimPanel'
 import TodayRail from '@/components/TodayRail'
 import Board from '@/components/Board'
-import { Trophy, GridPlus, Clock } from '@/components/icons'
+import { Trophy, GridPlus, Clock, Grid, Globe, Phone } from '@/components/icons'
 import CategoryIcon from '@/components/CategoryIcon'
 import { getBoard, priceToLead, getTotalsByCategory, findListingBySlugAny } from '@/lib/rank'
 import { reconcileDodoPayment, reconcileListing, type Reconciled } from '@/lib/payments'
@@ -12,9 +12,17 @@ export const dynamic = 'force-dynamic'
 
 const PAGE_SIZE = 50
 
+/** Website or app. An X profile is a page on the web, so it counts as a site. */
+const KINDS = [
+  ['all', 'All', Grid],
+  ['website', 'Website', Globe],
+  ['app', 'App', Phone],
+] as const
+
 type Search = {
   scope?: string
   category?: string
+  kind?: string
   page?: string
   claimed?: string
   payment_id?: string
@@ -36,6 +44,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Sea
   const sp = await searchParams
   const scope: 'all' | 'today' = sp.scope === 'today' ? 'today' : 'all'
   const category = sp.category && sp.category !== 'all' ? sp.category : undefined
+  const kind = sp.kind === 'website' || sp.kind === 'app' ? sp.kind : undefined
   const page = Math.max(1, Number(sp.page) || 1)
 
   /**
@@ -63,8 +72,8 @@ export default async function Page({ searchParams }: { searchParams: Promise<Sea
   // That is two fewer round trips per render, which matters more than it looks
   // when the database is a continent away.
   const [rows, totalsByCategory] = await Promise.all([
-    getBoard({ scope, category, limit: PAGE_SIZE, offset: (page - 1) * PAGE_SIZE }),
-    getTotalsByCategory(),
+    getBoard({ scope, category, kind, limit: PAGE_SIZE, offset: (page - 1) * PAGE_SIZE }),
+    getTotalsByCategory(kind),
   ])
 
   const totals = totalsByCategory[category ?? 'all'] ?? []
@@ -76,7 +85,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Sea
 
   const qs = (patch: Record<string, string | undefined>) => {
     const p = new URLSearchParams()
-    const merged = { scope: sp.scope, category: sp.category, page: sp.page, ...patch }
+    const merged = { scope: sp.scope, category: sp.category, kind: sp.kind, page: sp.page, ...patch }
     for (const [k, v] of Object.entries(merged)) if (v) p.set(k, v)
     const s = p.toString()
     return s ? `/?${s}` : '/'
@@ -104,6 +113,22 @@ export default async function Page({ searchParams }: { searchParams: Promise<Sea
           </Link>
         </div>
       </nav>
+
+      {/* What sort of thing, above what span of time. Both narrow the same
+          board, and both renumber what is left. */}
+      <div className="scope kinds">
+        <div className="scope-in">
+          {KINDS.map(([slug, label, Mark]) => (
+            <Link
+              key={slug}
+              href={qs({ kind: slug === 'all' ? undefined : slug, page: undefined })}
+              aria-current={(sp.kind ?? 'all') === slug}
+            >
+              <Mark size={15} /> {label}
+            </Link>
+          ))}
+        </div>
+      </div>
 
       <div className="scope">
         <div className="scope-in">

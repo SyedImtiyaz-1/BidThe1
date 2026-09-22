@@ -9,6 +9,15 @@ export type Meta = {
   tagline: string
   iconUrl: string | null
   category?: string
+  kind: ListingKind
+}
+
+export type ListingKind = 'website' | 'app'
+
+/** App stores are apps. Everything else, including an X profile, is a website. */
+export function listingKind(u: URL): ListingKind {
+  const host = u.hostname.replace(/^www\./, '')
+  return host === 'apps.apple.com' || host === 'play.google.com' ? 'app' : 'website'
 }
 
 export function normalizeUrl(input: string): URL | null {
@@ -145,6 +154,7 @@ async function fromAppStore(u: URL): Promise<Meta | null> {
       url: app.trackViewUrl || u.toString(),
       key: listingKey(u),
       host: 'apps.apple.com',
+      kind: 'app' as const,
       title: cleanTitle(app.trackName || u.hostname, 'apps.apple.com'),
       tagline: (app.description || '').split('\n')[0].slice(0, 180),
       iconUrl: app.artworkUrl512 || app.artworkUrl100 || null,
@@ -185,6 +195,7 @@ export async function fetchMeta(input: string): Promise<Meta | null> {
   const fallback: Meta = {
     url: u.toString(),
     key: listingKey(u),
+    kind: listingKind(u),
     host,
     title: host,
     tagline: '',
@@ -227,6 +238,7 @@ export async function fetchMeta(input: string): Promise<Meta | null> {
     return {
       url: u.toString(),
       key: listingKey(u),
+      kind: listingKind(u),
       host,
       title: handleTitle(u) ?? cleanTitle(title, host),
       tagline: tagline.slice(0, 180),

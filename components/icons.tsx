@@ -239,3 +239,10 @@ export const ArrowRight = ({ size = 16, className }: P) => (
 export const Bolt = ({ size = 16, className }: P) => (
   <svg {...base(size)} className={className}><path d="M11 3 5 11.5h4.5L9 17l6-8.5h-4.5z" /></svg>
 )
+
+export const Globe = ({ size = 16, className }: P) => (
+  <svg {...base(size)} className={className}>
+    <circle cx="10" cy="10" r="6.5" />
+    <path d="M3.5 10h13M10 3.5c1.8 2 2.7 4.2 2.7 6.5S11.8 14.5 10 16.5C8.2 14.5 7.3 12.3 7.3 10S8.2 5.5 10 3.5Z" />
+  </svg>
+)

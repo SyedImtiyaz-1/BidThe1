@@ -49,11 +49,15 @@ export async function getBoard(opts: {
   scope: 'all' | 'today' | 'day'
   day?: string
   category?: string
+  kind?: string
   limit?: number
   offset?: number
 }): Promise<BoardRow[]> {
-  const { scope, day, category, limit = 50, offset = 0 } = opts
+  const { scope, day, category, kind, limit = 50, offset = 0 } = opts
   const cat = category && category !== 'all' ? category : null
+  // Narrowing by kind renumbers, exactly as narrowing by category does: what
+  // you are looking at is a board, so its first row is #1.
+  const knd = kind && kind !== 'all' ? kind : null
 
   // One UTC calendar day, frozen once the day closes. No archive table and no
   // nightly job: the ledger already holds every payment with its timestamp.
@@ -74,9 +78,10 @@ export async function getBoard(opts: {
          join spend s on s.listing_id = l.id
         where l.status = 'live'
           and ($2::text is null or l.category = $2::text)
+          and ($5::text is null or l.kind = $5::text)
         order by s.day_minor desc, s.first_at asc
         limit $3 offset $4`,
-      [day, cat, limit, offset],
+      [day, cat, limit, offset, knd],
     )
     return rows.map(shape)
   }
@@ -100,9 +105,10 @@ export async function getBoard(opts: {
          join today t on t.listing_id = l.id
         where l.status = 'live'
           and ($1::text is null or l.category = $1::text)
+          and ($4::text is null or l.kind = $4::text)
         order by t.today_minor desc, t.first_today asc
         limit $2 offset $3`,
-      [cat, limit, offset],
+      [cat, limit, offset, knd],
     )
     return rows.map(shape)
   }
@@ -121,9 +127,10 @@ export async function getBoard(opts: {
        from listings l
       where l.status = 'live'
         and ($1::text is null or l.category = $1::text)
+        and ($4::text is null or l.kind = $4::text)
       order by l.total_minor desc, l.first_reached_at asc
       limit $2 offset $3`,
-    [cat, limit, offset],
+    [cat, limit, offset, knd],
   )
   return rows.map(shape)
 }
@@ -207,13 +214,18 @@ export async function projectedRank(
  * one array per category. Fetching them in one pass and partitioning in
  * memory costs a single round trip; fetching them per category costs nine.
  */
-export async function getTotalsByCategory(limit = 5000): Promise<Record<string, number[]>> {
+export async function getTotalsByCategory(
+  kind?: string,
+  limit = 5000,
+): Promise<Record<string, number[]>> {
+  const knd = kind && kind !== 'all' ? kind : null
   const rows = await q<{ category: string; total_minor: string }>(
     `select category, total_minor from listings
       where status = 'live' and total_minor > 0
+        and ($2::text is null or kind = $2::text)
       order by total_minor desc
       limit $1`,
-    [limit],
+    [limit, knd],
   )
   // The query is already sorted, so every partition comes out sorted too.
   const out: Record<string, number[]> = { all: [] }

@@ -253,6 +253,10 @@ button, input, select { font: inherit; color: inherit; }
   justify-content: center;
   margin: 26px 0 0;
 }
+/* The kind filter sits above the time filter and reads as the quieter of the
+   two, because most people want the whole board. */
+.kinds { margin-top: 20px; }
+.kinds + .scope { margin-top: 8px; }
 .scope-in {
   display: inline-flex;
   gap: 2px;
