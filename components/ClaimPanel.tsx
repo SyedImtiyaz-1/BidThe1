@@ -6,6 +6,7 @@ import { Plus, Minus, Bolt } from './icons'
 import { PICKABLE_CATEGORIES, BASE_CURRENCY, MAX_PAYMENT_MINOR } from '@/lib/config'
 import {
   formatMoney, moneyParts, unitMinor, unitsToBase, unitsToBeat, baseToUnits, baseToUnitsDown,
+  displayUnits,
 } from '@/lib/money'
 
 type ClaimResult = {
@@ -94,7 +95,15 @@ export default function ClaimPanel({
 
   const amount = unitsToBase(units, currency, rate)
   const parts = moneyParts(units * unitMinor(currency), currency)
-  const heroRank = rankFor(amount, totals)
+
+  /**
+   * Rank is judged in the units on screen. Two amounts that print the same
+   * number must not rank differently, whatever the paise underneath say: a
+   * leader showing $878 is beaten by $879 and tied by $878, and a tie loses.
+   * The charge for $879 exceeds the leader's rupees by construction, so the
+   * board can only agree with this or do better, never worse.
+   */
+  const heroRank = rankFor(units, totals.map((t) => displayUnits(t, currency, rate)))
   const converted = currency !== BASE_CURRENCY
 
   const set = (u: number) => { setTyping(null); setTouched(true); setUnits(clamp(u)) }

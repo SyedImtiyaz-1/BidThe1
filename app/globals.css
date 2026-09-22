@@ -262,6 +262,9 @@ button, input, select { font: inherit; color: inherit; }
 .hero { text-align: center; padding: 16px 0 0; }
 
 .head-line {
+  /* The one place a display face earns its download. Everything else stays
+     on the system UI font. */
+  font-family: var(--font-display), var(--font-sans);
   font-size: 48px;
   line-height: 1.04;
   margin: 0;
@@ -560,7 +563,7 @@ button, input, select { font: inherit; color: inherit; }
 
 .claim-tab {
   position: absolute;
-  top: -11px; right: 22px;
+  top: -11px; left: 50%; transform: translateX(-50%);
   opacity: 0;
   pointer-events: none;
   transition: opacity .12s ease;

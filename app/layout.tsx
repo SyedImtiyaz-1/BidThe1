@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Script from 'next/script'
+import { Poppins } from 'next/font/google'
 import { cookies } from 'next/headers'
 import './globals.css'
 import Nav from '@/components/Nav'
@@ -9,6 +10,13 @@ import { SITE_NAME, SITE_DOMAIN, SITE_URL, SITE_TAGLINE, BUSINESS } from '@/lib/
 
 const DESCRIPTION =
   'A public leaderboard where rank is bought. Pay to list your product, and the only way past you is someone paying more. Every listing shows the visitors it received and what they cost.'
+
+const poppins = Poppins({
+  subsets: ['latin'],
+  weight: ['600', '700'],
+  display: 'swap',
+  variable: '--font-display',
+})
 
 export const metadata: Metadata = {
   // Everything relative below resolves against this, including the OG image.
@@ -89,7 +97,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   }
 
   return (
-    <html lang="en" data-theme={theme} suppressHydrationWarning>
+    <html lang="en" data-theme={theme} className={poppins.variable} suppressHydrationWarning>
       <head>
         {/* Applies the stored theme before first paint, so the page does not
             flash light and then correct itself. */}
