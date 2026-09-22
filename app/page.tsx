@@ -101,12 +101,13 @@ export default async function Page({ searchParams }: { searchParams: Promise<Sea
               {c.label}
             </Link>
           ))}
+          {/* Inside the scroll track, so that when it is pinned at desktop
+              width the track can still scroll clear of it, and when it is not
+              pinned it is simply the last item. */}
+          <Link href="/categories" className="catbar-explore">
+            <GridPlus /> Explore
+          </Link>
         </div>
-        {/* Pinned over the scrolling list, behind a fade, so the way to every
-            category is always visible however far the bar has been scrolled. */}
-        <Link href="/categories" className="catbar-explore">
-          <GridPlus /> Explore
-        </Link>
       </nav>
 
       <div className="scope">

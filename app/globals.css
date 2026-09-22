@@ -200,8 +200,8 @@ button, input, select { font: inherit; color: inherit; }
   min-width: 0;
   overflow-x: auto;
   scrollbar-width: none;
-  /* room so the last pill can scroll out from under the pinned link */
-  padding-right: 120px;
+  /* room so the last pill can scroll clear of the pinned link and its fade */
+  padding-right: 150px;
 }
 .catbar-scroll::-webkit-scrollbar { display: none; }
 .catbar a {
@@ -226,13 +226,24 @@ button, input, select { font: inherit; color: inherit; }
 .catbar a[aria-current='true'] svg { color: inherit; }
 .catbar-explore {
   position: absolute;
-  top: 5px; right: 5px; bottom: 5px;
-  padding: 0 16px 0 48px;
+  top: 0; right: 0; bottom: 0;
+  padding: 0 16px;
   color: var(--accent-ink) !important;
-  background: linear-gradient(90deg, transparent, var(--paper-2) 40px);
+  /* Opaque under the label, not a gradient. A gradient behind text lets the
+     pill underneath show through the middle of a letter, which reads as two
+     words printed on top of each other rather than as a fade. */
+  background: var(--paper-2);
   border-radius: 0 var(--r-pill) var(--r-pill) 0;
 }
-.catbar-explore:hover { background: linear-gradient(90deg, transparent, var(--paper-2) 40px); color: var(--accent-strong) !important; }
+/* The fade is its own strip, to the left of the opaque part. */
+.catbar-explore::before {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0; left: -34px; width: 34px;
+  background: linear-gradient(90deg, transparent, var(--paper-2));
+  pointer-events: none;
+}
+.catbar-explore:hover { color: var(--accent-strong) !important; }
 .catbar-explore svg { color: inherit !important; }
 
 .scope {
@@ -912,6 +923,20 @@ dialog[open] { opacity: 1; transform: none; transition: opacity .16s ease, trans
 
 @media (min-width: 1600px) {
   :root { --page: 1120px; }
+}
+
+/* The pinned Explore link only works where the whole bar fits. Below that a
+   pill scrolls under it, so it rejoins the list as its last item. */
+@media (max-width: 1023px) {
+  .catbar-scroll { padding-right: 0; }
+  .catbar-explore {
+    position: static;
+    padding: 7px 14px;
+    background: none;
+    border-radius: var(--r-pill);
+    flex: 0 0 auto;
+  }
+  .catbar-explore::before { content: none; }
 }
 
 /* Tablets and small laptops: one column, the rail under the board, the link
