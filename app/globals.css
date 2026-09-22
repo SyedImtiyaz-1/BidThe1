@@ -382,14 +382,6 @@ button, input, select { font: inherit; color: inherit; }
 /* Paid-placement disclosure. Directly above the first listing, at listing type
    size. Not the footer and not behind an icon: EU UCPD Annex I point 11a
    blacklists undisclosed paid ranking with no consumer-harm test attached. */
-.disclosure {
-  font-size: 13px;
-  color: var(--ink-2);
-  margin: 0 0 12px;
-}
-.disclosure strong { color: var(--ink); font-weight: 600; }
-.disclosure a { color: var(--accent-ink); text-decoration: underline; text-underline-offset: 2px; }
-
 /* --- board ---------------------------------------------------------------- */
 
 .board { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }

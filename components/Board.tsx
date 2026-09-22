@@ -41,14 +41,6 @@ export default function Board({
 
   return (
     <>
-      {/* Above the first row, same size as the row titles. Not the footer and
-          not a tooltip: undisclosed paid ranking is blacklisted outright by EU
-          UCPD Annex I point 11a, with no consumer-harm test attached. */}
-      <p className="disclosure">
-        <strong>Paid rankings.</strong> Every listing is an advertisement, sorted by amount paid
-        and nothing else. <Link href="/rules">How ranking works</Link>
-      </p>
-
       <ul className="board">
         {rows.map((r) => {
           const shown = scope === 'all' ? r.total_minor : r.today_minor
