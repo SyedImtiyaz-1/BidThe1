@@ -1,37 +1,38 @@
 /* ---------------------------------------------------------------------------
-   One blue accent, near-neutral cool greys, Inter tuned rather than stock.
+   One accent, taken from the mark: the logo's orange, oklch hue 35. Neutrals
+   lean the same way, so greys read warm rather than as leftover blue.
    Layout is centred and pill-based: compact, few elements, lots of air.
 --------------------------------------------------------------------------- */
 
 :root {
-  --paper:        oklch(.993 .002 250);
-  --paper-2:      oklch(.975 .004 250);
-  --paper-3:      oklch(.950 .006 250);
-  --line:         oklch(.908 .008 250);
-  --line-strong:  oklch(.840 .012 252);
+  --paper:        oklch(.995 .003 70);
+  --paper-2:      oklch(.975 .005 70);
+  --paper-3:      oklch(.950 .008 70);
+  --line:         oklch(.910 .009 70);
+  --line-strong:  oklch(.840 .014 65);
 
-  --ink:          oklch(.245 .015 255);
-  --ink-2:        oklch(.450 .014 255);
-  --ink-3:        oklch(.605 .012 255);
+  --ink:          oklch(.240 .012 60);
+  --ink-2:        oklch(.450 .012 60);
+  --ink-3:        oklch(.600 .012 60);
 
-  --accent:        oklch(.545 .175 252);
-  --accent-strong: oklch(.485 .180 252);
-  --accent-ink:    oklch(.470 .155 252);
-  --accent-on:     oklch(.99 .005 250);
-  --accent-wash:   oklch(.970 .020 252);
-  --accent-wash-2: oklch(.930 .045 252);
+  --accent:        oklch(.630 .219 35);
+  --accent-strong: oklch(.575 .215 35);
+  --accent-ink:    oklch(.505 .190 35);
+  --accent-on:     oklch(.995 .005 70);
+  --accent-wash:   oklch(.965 .022 45);
+  --accent-wash-2: oklch(.930 .050 45);
 
   --shadow-1:
-    0 1px 1px oklch(.28 .04 255 / .05),
-    0 2px 4px -1px oklch(.28 .04 255 / .04);
+    0 1px 1px oklch(.30 .03 60 / .05),
+    0 2px 4px -1px oklch(.30 .03 60 / .04);
   --shadow-2:
-    0 1px 1px oklch(.28 .04 255 / .04),
-    0 3px 6px -2px oklch(.28 .04 255 / .05),
-    0 10px 20px -6px oklch(.28 .04 255 / .06);
+    0 1px 1px oklch(.30 .03 60 / .04),
+    0 3px 6px -2px oklch(.30 .03 60 / .05),
+    0 10px 20px -6px oklch(.30 .03 60 / .06);
   --shadow-3:
-    0 2px 4px oklch(.28 .04 255 / .06),
-    0 8px 16px -4px oklch(.28 .04 255 / .08),
-    0 24px 48px -12px oklch(.28 .04 255 / .12);
+    0 2px 4px oklch(.30 .03 60 / .06),
+    0 8px 16px -4px oklch(.30 .03 60 / .08),
+    0 24px 48px -12px oklch(.30 .03 60 / .12);
 
   --r-pill: 999px;
   --r-card: 16px;
@@ -49,22 +50,22 @@
 }
 
 :root[data-theme='dark'] {
-  --paper:        oklch(.180 .008 255);
-  --paper-2:      oklch(.222 .010 255);
-  --paper-3:      oklch(.262 .012 255);
-  --line:         oklch(.318 .014 255);
-  --line-strong:  oklch(.420 .016 255);
+  --paper:        oklch(.175 .008 60);
+  --paper-2:      oklch(.215 .010 60);
+  --paper-3:      oklch(.255 .012 60);
+  --line:         oklch(.310 .014 60);
+  --line-strong:  oklch(.410 .016 60);
 
-  --ink:          oklch(.950 .004 250);
-  --ink-2:        oklch(.760 .008 252);
-  --ink-3:        oklch(.620 .010 252);
+  --ink:          oklch(.955 .006 70);
+  --ink-2:        oklch(.765 .010 65);
+  --ink-3:        oklch(.620 .012 65);
 
-  --accent:        oklch(.600 .170 254);
-  --accent-strong: oklch(.665 .160 254);
-  --accent-ink:    oklch(.780 .130 254);
-  --accent-on:     oklch(.99 .005 250);
-  --accent-wash:   oklch(.258 .035 254);
-  --accent-wash-2: oklch(.318 .060 254);
+  --accent:        oklch(.690 .200 38);
+  --accent-strong: oklch(.740 .185 40);
+  --accent-ink:    oklch(.790 .160 45);
+  --accent-on:     oklch(.175 .010 60);
+  --accent-wash:   oklch(.255 .040 40);
+  --accent-wash-2: oklch(.315 .065 40);
 
   --shadow-1: 0 1px 2px oklch(0 0 0 / .4);
   --shadow-2: 0 2px 8px oklch(0 0 0 / .45);
@@ -141,7 +142,7 @@ button, input, select { font: inherit; color: inherit; }
   border-radius: var(--r-pill);
   padding: 7px 16px;
 }
-.pill-stat b { color: oklch(.60 .16 150); font-weight: 600; }
+.pill-stat b { color: var(--accent-ink); font-weight: 600; }
 .pill-stat .sep { opacity: .4; }
 .pill-stat a { color: var(--ink-2); }
 .pill-stat a:hover { color: var(--accent-ink); }
@@ -303,7 +304,6 @@ button, input, select { font: inherit; color: inherit; }
 }
 .price-input::-webkit-outer-spin-button,
 .price-input::-webkit-inner-spin-button { appearance: none; margin: 0; }
-.price-input:hover { background: var(--accent-wash); }
 .price-input:focus {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
@@ -594,7 +594,6 @@ button, input, select { font: inherit; color: inherit; }
   .row:first-child .claim-tab { opacity: 1; pointer-events: auto; }
 }
 
-.empty { padding: 48px 0; color: var(--ink-2); text-align: center; }
 
 .landed {
   margin: 0 0 14px;
@@ -691,12 +690,6 @@ dialog[open] { opacity: 1; transform: none; transition: opacity .16s ease, trans
 
 /* --- footer --------------------------------------------------------------- */
 
-.foot { margin-top: 72px; padding: 34px 0 52px; text-align: center; }
-.foot-links { display: flex; justify-content: center; gap: 0; flex-wrap: wrap; font-size: 15px; margin: 0 0 16px; }
-.foot-links a { color: var(--accent-ink); padding: 0 10px; }
-.foot-links a:hover { text-decoration: underline; text-underline-offset: 3px; }
-.foot-links .sep { color: var(--ink-3); opacity: .5; }
-.foot p { color: var(--ink-3); font-size: 13.5px; margin: 0 auto 6px; max-width: 70ch; line-height: 20px; }
 
 /* --- prose pages ---------------------------------------------------------- */
 
@@ -853,33 +846,141 @@ dialog[open] { opacity: 1; transform: none; transition: opacity .16s ease, trans
   .dot { animation: none; }
 }
 
+/* --- mobile menu ---------------------------------------------------------- */
+
+.menu { display: none; position: relative; }
+.burger { display: grid; gap: 4px; width: 16px; }
+.burger i { display: block; height: 1.5px; background: currentColor; border-radius: 1px; transition: transform .18s ease, opacity .18s ease; }
+.burger.is-open i:nth-child(1) { transform: translateY(5.5px) rotate(45deg); }
+.burger.is-open i:nth-child(2) { opacity: 0; }
+.burger.is-open i:nth-child(3) { transform: translateY(-5.5px) rotate(-45deg); }
+.menu-backdrop { position: fixed; inset: 0; background: oklch(0 0 0 / .25); z-index: 40; }
+.menu-panel {
+  position: absolute;
+  top: calc(100% + 10px); right: 0;
+  z-index: 41;
+  min-width: 220px;
+  display: grid;
+  padding: 8px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  box-shadow: var(--shadow-3);
+}
+.menu-panel a { padding: 11px 14px; border-radius: 12px; font-size: 16px; font-weight: 500; color: var(--ink); }
+.menu-panel a:hover { background: var(--paper-2); }
+
+/* --- footer, rebuilt ------------------------------------------------------ */
+
+.foot { margin-top: 72px; border-top: 1px solid var(--line); padding: 40px 0 36px; text-align: left; }
+.foot-grid { display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr; gap: 28px; }
+.foot-brand .wordmark { font-size: 19px; }
+.foot-brand p { font-size: 14px; color: var(--ink-2); margin: 12px 0 0; max-width: 34ch; line-height: 1.5; }
+.foot-brand .foot-contact { margin-top: 10px; color: var(--ink-3); }
+.foot-brand .foot-contact a { color: var(--ink-2); }
+.foot-brand .foot-contact a:hover { color: var(--accent-ink); }
+.foot-col h4 { font-size: 12px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--ink-3); margin: 4px 0 12px; }
+.foot-col a { display: block; font-size: 14.5px; color: var(--ink-2); padding: 4px 0; }
+.foot-col a:hover { color: var(--accent-ink); }
+.foot-bar {
+  display: flex; flex-wrap: wrap; gap: 6px 22px;
+  margin-top: 34px; padding-top: 18px;
+  border-top: 1px solid var(--line);
+  font-size: 13px; color: var(--ink-3);
+}
+.foot-bar .grow { flex: 1 1 auto; }
+
+/* --- empty board ---------------------------------------------------------- */
+
+.empty { padding: 56px 20px; text-align: center; display: grid; gap: 6px; justify-items: center; }
+.empty h3 { font-size: 20px; letter-spacing: -.02em; margin: 0; }
+.empty p { color: var(--ink-2); margin: 0 0 12px; font-size: 15px; }
+.empty .btn { height: 44px; display: inline-flex; align-items: center; padding: 0 22px; font-size: 15px; color: var(--accent-on); }
+
+.row-cat { display: inline-flex; align-items: center; gap: 5px; }
+.row-cat svg { color: var(--accent-ink); }
+
 /* --- responsive ----------------------------------------------------------- */
 
-@media (max-width: 1000px) {
-  .cols { grid-template-columns: 1fr; gap: 34px; }
-  .head-line { font-size: 38px; gap: 10px; }
-  .nav-links { display: none; }
+/* Type scales with the viewport between the breakpoints, so a 1180px laptop
+   and a 1000px tablet both come out right rather than only the two extremes. */
+.head-line { font-size: clamp(28px, 2.2vw + 18px, 48px); }
+
+@media (min-width: 1600px) {
+  :root { --page: 1120px; }
 }
 
+/* Tablets and small laptops: one column, the rail under the board, the link
+   row folds into the menu. */
+@media (max-width: 960px) {
+  .cols { grid-template-columns: 1fr; gap: 30px; }
+  .nav-links { display: none; }
+  .menu { display: block; }
+  .nav-right { gap: 10px; }
+  .foot-grid { grid-template-columns: 1fr 1fr 1fr; gap: 26px 20px; }
+  .foot-brand { grid-column: 1 / -1; }
+}
+
+/* Phones */
 @media (max-width: 680px) {
   .wrap { padding: 0 16px; }
-  .head-line { font-size: 28px; gap: 8px; }
+  .nav { padding-top: 10px; }
+  .wordmark { font-size: 19px; }
+  .pill-stat { display: none; }
+  .head-line { gap: 8px; }
   .step-btn { width: 26px; height: 26px; }
   .claim-row { flex-wrap: wrap; gap: 10px; }
   .input { flex: 1 1 100%; height: 48px; }
   .select { flex: 1 1 140px; height: 48px; }
   .btn { flex: 1 1 140px; height: 48px; padding: 0 20px; }
-  .pill-stat { display: none; }
-  .row {
-    grid-template-columns: 34px 46px minmax(0, 1fr);
-    row-gap: 4px; column-gap: 14px;
-    padding: 14px 14px;
-  }
+  .row { grid-template-columns: 30px 44px minmax(0, 1fr); column-gap: 12px; padding: 12px; }
   .row-main { grid-column: 3; }
   .row-head { flex-wrap: wrap; gap: 2px 12px; }
-  .ico { width: 46px; height: 46px; }
-  .rank { font-size: 17px; }
-  .row-title { font-size: 17px; }
+  .ico { width: 44px; height: 44px; }
+  .rank { font-size: 15px; }
+  .row.podium .rank { font-size: 17px; }
+  .row-title { font-size: 16px; }
+  .money { font-size: 17px; }
   .prose h1 { font-size: 32px; line-height: 36px; }
-  .foot-links { font-size: 14px; }
+  .cat-head h1 { font-size: 28px; }
+  .stands { grid-template-columns: 1fr 1fr; }
+  .foot { padding: 32px 0 28px; }
+  .foot-grid { grid-template-columns: 1fr 1fr; }
+  .foot-bar { flex-direction: column; gap: 6px; }
 }
+
+/* Small phones */
+@media (max-width: 400px) {
+  .wrap { padding: 0 12px; }
+  .catbar a { padding: 6px 11px; font-size: 13.5px; }
+  .scope-in a { padding: 6px 12px; font-size: 13.5px; }
+  .row { grid-template-columns: 26px 40px minmax(0, 1fr); column-gap: 10px; }
+  .ico { width: 40px; height: 40px; }
+  .stands { grid-template-columns: 1fr; }
+  .foot-grid { grid-template-columns: 1fr; }
+  .cur-select { padding: 6px 26px 6px 10px; font-size: 13px; }
+}
+
+/* Short landscape phones: the hero must not take the whole screen. */
+@media (max-height: 480px) and (orientation: landscape) {
+  .scope { margin-top: 14px; }
+  .hero { padding-top: 8px; }
+}
+
+/* --- marks on the text line ----------------------------------------------- */
+
+.nav-links a, .menu-panel a, .foot-col a, .foot-contact a, .crumbs a,
+.hot-name, .cat-board h2 a, .stand-k, .details, .rail-title {
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.menu-panel a { display: flex; gap: 10px; }
+.foot-col a { display: flex; gap: 8px; }
+.foot-brand .foot-contact { display: flex; flex-wrap: wrap; gap: 6px 16px; }
+.nav-links a svg, .menu-panel a svg, .hot-name svg, .cat-board h2 a svg, .stand-k svg,
+.crumbs a svg, .pill-stat svg, .rail-title svg { color: var(--accent-ink); flex: 0 0 auto; }
+.foot-col a svg, .foot-contact a svg { color: var(--ink-3); flex: 0 0 auto; }
+.foot-col a:hover svg, .foot-contact a:hover svg { color: var(--accent-ink); }
+.details svg { transition: transform .15s ease; }
+.details:hover svg { transform: translateX(2px); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+.empty svg { color: var(--accent); }

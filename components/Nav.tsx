@@ -7,6 +7,8 @@ import { getRates } from '@/lib/fx'
 import { getDisplayCurrency } from '@/lib/session'
 import CurrencySelect from './CurrencySelect'
 import ThemeToggle from './ThemeToggle'
+import MobileMenu from './MobileMenu'
+import { Calendar, Grid, Info, Scale, BarChart } from './icons'
 
 export default async function Nav() {
   const [stats, currency, { rates }] = await Promise.all([
@@ -36,6 +38,7 @@ export default async function Nav() {
         {/* Counted from real sessions. An invented presence number is false
             urgency under the CCPA dark-pattern guidelines. */}
         <span className="pill-stat num">
+          <BarChart size={14} />
           {showTraffic ? (
             <>
               {stats.online > 0 && <span className="dot" />}
@@ -60,13 +63,14 @@ export default async function Nav() {
 
         <div className="nav-right">
           <div className="nav-links">
-            <Link href="/daily">Daily</Link>
-            <Link href="/categories">Categories</Link>
-            <Link href="/about">About</Link>
-            <Link href="/rules">Rules</Link>
+            <Link href="/daily"><Calendar size={15} /> Daily</Link>
+            <Link href="/categories"><Grid size={15} /> Categories</Link>
+            <Link href="/about"><Info size={15} /> About</Link>
+            <Link href="/rules"><Scale size={15} /> Rules</Link>
           </div>
           <CurrencySelect value={currency} />
           <ThemeToggle />
+          <MobileMenu />
         </div>
       </div>
     </nav>

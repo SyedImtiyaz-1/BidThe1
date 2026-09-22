@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { LinkIcon } from './icons'
 
 /** Copies the page's own URL. Falls back to nothing louder than a label change. */
 export default function CopyLink() {
@@ -16,7 +17,7 @@ export default function CopyLink() {
         } catch {}
       }}
     >
-      {done ? 'Copied' : 'Copy link'}
+      <LinkIcon size={14} /> {done ? 'Copied' : 'Copy link'}
     </button>
   )
 }

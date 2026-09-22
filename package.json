@@ -6,8 +6,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
-    "seed": "node --experimental-strip-types scripts/seed.ts"
+    "start": "next start"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.3.11",

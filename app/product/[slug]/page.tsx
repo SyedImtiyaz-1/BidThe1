@@ -2,9 +2,11 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { cache } from 'react'
 import type { Metadata } from 'next'
+import type React from 'react'
 import Money from '@/components/Money'
 import CopyLink from '@/components/CopyLink'
 import CategoryIcon from '@/components/CategoryIcon'
+import { Trophy, Clock, ExternalLink, LinkIcon, Bolt } from '@/components/icons'
 import { getListingDetail as loadDetail } from '@/lib/rank'
 import { getRates } from '@/lib/fx'
 import { getDisplayCurrency } from '@/lib/session'
@@ -110,10 +112,11 @@ export default async function Page({ params }: Params) {
   }
 
   const card = (
-    label: string, s: { rank: number; count: number } | null, where: string, href: string, extra?: string,
+    label: string, s: { rank: number; count: number } | null, where: string, href: string,
+    mark: React.ReactNode, extra?: string,
   ) => (
     <Link href={href} className="stand">
-      <span className="stand-k">{label}</span>
+      <span className="stand-k">{mark} {label}</span>
       {s ? (
         <>
           <span className="stand-v num">#{s.rank}</span>
@@ -134,9 +137,9 @@ export default async function Page({ params }: Params) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
       <nav className="crumbs" aria-label="Breadcrumb">
-        <Link href="/">Leaderboard</Link>
+        <Link href="/"><Trophy size={14} /> Leaderboard</Link>
         <span className="sep">·</span>
-        <Link href={`/?category=${l.category}`}>{cat}</Link>
+        <Link href={`/?category=${l.category}`}><CategoryIcon slug={l.category} size={14} /> {cat}</Link>
       </nav>
 
       <header className="product-head">
@@ -154,7 +157,9 @@ export default async function Page({ params }: Params) {
           </div>
           {l.tagline && <p className="product-tag">{l.tagline}</p>}
           <div className="product-actions">
-            <a className="btn" href={`/go/${l.slug}`} rel="sponsored nofollow noopener" target="_blank">Visit</a>
+            <a className="btn" href={`/go/${l.slug}`} rel="sponsored nofollow noopener" target="_blank">
+              Visit <ExternalLink size={14} />
+            </a>
             <CopyLink />
           </div>
         </div>
@@ -165,10 +170,10 @@ export default async function Page({ params }: Params) {
       </header>
 
       <div className="stands">
-        {card('Category rank', d.category, `in ${cat}`, `/?category=${l.category}`)}
-        {card('Overall', d.overall, 'on the board', '/')}
-        {card(`Today in ${cat}`, d.todayCategory, `after ${todayText} today`, `/?scope=today&category=${l.category}`)}
-        {card('Today overall', d.todayOverall, "on today's board", '/?scope=today')}
+        {card('Category rank', d.category, `in ${cat}`, `/?category=${l.category}`, <CategoryIcon slug={l.category} size={14} />)}
+        {card('Overall', d.overall, 'on the board', '/', <Trophy size={14} />)}
+        {card(`Today in ${cat}`, d.todayCategory, `after ${todayText} today`, `/?scope=today&category=${l.category}`, <Clock size={14} />)}
+        {card('Today overall', d.todayOverall, "on today's board", '/?scope=today', <Clock size={14} />)}
       </div>
 
       <section className="about-rank">
@@ -184,14 +189,14 @@ export default async function Page({ params }: Params) {
           </div>
         ))}
         <p className="take">
-          <Link href={`/?category=${l.category}#claim`} className="btn">Take this rank for {takeText}</Link>
+          <Link href={`/?category=${l.category}#claim`} className="btn"><Bolt /> Take this rank for {takeText}</Link>
         </p>
       </section>
 
       {d.neighbours.length > 0 && (
         <section className="also">
           <div className="rail-head">
-            <span className="rail-title">Also in {cat}</span>
+            <span className="rail-title"><CategoryIcon slug={l.category} size={16} /> Also in {cat}</span>
             <Link href={`/?category=${l.category}`} className="rail-link">See all ›</Link>
           </div>
           <ol className="cat-rows">

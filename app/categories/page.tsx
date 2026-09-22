@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import Money from '@/components/Money'
-import { Trophy } from '@/components/icons'
+import { Trophy, Clock } from '@/components/icons'
+import CategoryIcon from '@/components/CategoryIcon'
 import { getCategoryBoards } from '@/lib/rank'
 import { getRates } from '@/lib/fx'
 import { getDisplayCurrency } from '@/lib/session'
@@ -48,7 +49,7 @@ export default async function Page({
       <div className="scope">
         <div className="scope-in">
           <Link href={href('all')} aria-current={scope === 'all'}><Trophy /> All-time</Link>
-          <Link href={href('today')} aria-current={scope === 'today'}>Today</Link>
+          <Link href={href('today')} aria-current={scope === 'today'}><Clock /> Today</Link>
         </div>
       </div>
 
@@ -65,7 +66,7 @@ export default async function Page({
           {hottest.map((b, i) => (
             <Link key={b.slug} href={`/?category=${b.slug}`} className="hot-card">
               <span className="hot-badge num">{i === 0 ? '#1 hottest' : `#${i + 1}`}</span>
-              <span className="hot-name">{LABEL.get(b.slug) ?? b.slug}</span>
+              <span className="hot-name"><CategoryIcon slug={b.slug} size={18} /> {LABEL.get(b.slug) ?? b.slug}</span>
               <span className="hot-meta num">
                 {b.claims} {b.claims === 1 ? 'claim' : 'claims'}
                 <span className="sep">·</span>
@@ -106,7 +107,7 @@ export default async function Page({
           return (
             <section key={c.slug} className="cat-board">
               <h2>
-                <Link href={`/?category=${c.slug}`}>{c.label}</Link>
+                <Link href={`/?category=${c.slug}`}><CategoryIcon slug={c.slug} size={16} /> {c.label}</Link>
                 <span className="cat-board-take num">
                   <Money minor={toLead * unitMinor(currency)} currency={currency} /> to lead
                 </span>

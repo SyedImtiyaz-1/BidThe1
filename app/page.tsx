@@ -2,7 +2,7 @@ import Link from 'next/link'
 import ClaimPanel from '@/components/ClaimPanel'
 import TodayRail from '@/components/TodayRail'
 import Board from '@/components/Board'
-import { Trophy, GridPlus } from '@/components/icons'
+import { Trophy, GridPlus, Clock } from '@/components/icons'
 import CategoryIcon from '@/components/CategoryIcon'
 import { getBoard, priceToLead, getTotalsByCategory, findListingBySlugAny } from '@/lib/rank'
 import { reconcileDodoPayment, reconcileListing, type Reconciled } from '@/lib/payments'
@@ -115,7 +115,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Sea
             <Trophy /> All-time
           </Link>
           <Link href={qs({ scope: 'today', page: undefined })} aria-current={scope === 'today'}>
-            Today
+            <Clock /> Today
           </Link>
         </div>
       </div>

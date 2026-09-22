@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { Plus, Minus } from './icons'
+import { Plus, Minus, Bolt } from './icons'
 import { PICKABLE_CATEGORIES, BASE_CURRENCY, MAX_PAYMENT_MINOR } from '@/lib/config'
 import {
   formatMoney, moneyParts, unitMinor, unitsToBase, unitsToBeat, baseToUnits, baseToUnitsDown,
@@ -304,7 +304,7 @@ export default function ClaimPanel({
             ))}
           </select>
           <button className="btn" onClick={startClaim} disabled={busy}>
-            {busy ? 'Working' : 'Claim rank'}
+            <Bolt /> {busy ? 'Working' : 'Claim rank'}
           </button>
         </div>
 

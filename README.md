@@ -15,11 +15,8 @@ pnpm dev
 
 That is the whole setup. With no `DATABASE_URL` the app runs Postgres compiled to WASM out of
 `./.pgdata`, so there is nothing to install and nothing to provision. Point `DATABASE_URL` at
-Supabase or Neon when you want the real thing. Seed a plausible board:
-
-```bash
-curl -X POST "http://localhost:3000/api/seed?token=devtoken&reset=1"
-```
+Supabase or Neon when you want the real thing. The board starts empty and fills only with paid
+listings; there is no demo data and no seed route.
 
 With no Dodo keys the checkout uses a local stand-in that applies the payment directly, so the
 full loop is testable before any account is approved. It switches itself off as soon as
@@ -36,7 +33,6 @@ Copy `.env.example` to `.env.local`. Every value is optional in development.
 | `DODO_WEBHOOK_SECRET` | Required for the webhook to credit anything. |
 | `DODO_MODE` | `test` or `live`. Picks the API base URL. |
 | `HASH_SALT` | Salts visitor hashes. Any random string. |
-| `ADMIN_TOKEN` | Gates `/api/seed`. |
 
 ## How the money works
 
@@ -93,7 +89,8 @@ a rank by roughly 85 times.
 - [ ] Decide whether displayed prices include GST at 18% and say so on the confirm dialog.
       Dodo is a merchant of record, so it handles the tax collection, but the number on the
       screen still has to be the number that gets debited.
-- [ ] Seed 15 to 30 listings before anyone sees it. Nobody pays to be first of nothing.
+- [ ] An empty board is the honest one. Every listing on it was paid for; the empty state
+      sells the first spot at the minimum rather than showing invented rivals.
 
 ## Layout
 
@@ -104,7 +101,6 @@ app/
   api/pay/mock                 local stand-in, disabled once Dodo keys exist
   api/webhooks/dodo            the only thing that credits money
   api/presence                 heartbeat behind the live counters
-  api/seed                     demo data, gated on ADMIN_TOKEN
   go/[slug]                    outbound redirect, counts the click in after()
   icon/[slug]                  favicon proxy so the board does not hotlink
 lib/

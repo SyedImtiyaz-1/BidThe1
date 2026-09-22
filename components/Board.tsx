@@ -4,19 +4,11 @@ import type { BoardRow } from '@/lib/rank'
 import { convertFromBase, unitsToBeat, unitsToBase, unitMinor } from '@/lib/money'
 import { CATEGORIES, MIN_FIRST_PAYMENT_MINOR } from '@/lib/config'
 import ClaimTab from './ClaimTab'
+import CategoryIcon from './CategoryIcon'
+import { ArrowRight, Sparkle } from './icons'
 import type { Rates } from '@/lib/fx'
 
 const CATEGORY_LABEL = new Map<string, string>(CATEGORIES.map((c) => [c.slug, c.label]))
-
-function age(iso: string): string {
-  const d = Date.now() - new Date(iso).getTime()
-  const day = 86_400_000
-  if (d < day) return 'today'
-  if (d < 2 * day) return 'yesterday'
-  if (d < 14 * day) return `${Math.floor(d / day)} days ago`
-  if (d < 60 * day) return `${Math.floor(d / (7 * day))} weeks ago`
-  return `${Math.floor(d / (30 * day))} months ago`
-}
 
 export default function Board({
   rows,
@@ -36,7 +28,14 @@ export default function Board({
   const rate = rates[currency] ?? 1
 
   if (rows.length === 0) {
-    return <p className="empty">Nothing here yet. Be the first.</p>
+    return (
+      <div className="empty">
+        <Sparkle size={28} />
+        <h3>No listings here yet.</h3>
+        <p>The first one takes #1 for the minimum.</p>
+        <a href="#claim" className="btn">List your product</a>
+      </div>
+    )
   }
 
   return (
@@ -86,17 +85,16 @@ export default function Board({
                 </div>
                 {r.tagline && <div className="row-tag">{r.tagline}</div>}
                 <div className="row-meta">
-                  <Link href={`/?category=${r.category}`}>
+                  <Link href={`/?category=${r.category}`} className="row-cat">
+                    <CategoryIcon slug={r.category} size={13} />
                     {CATEGORY_LABEL.get(r.category) ?? r.category}
                   </Link>
-                  <span className="sep">·</span>
-                  <span>{age(r.created_at)}</span>
                   <span className="sep">·</span>
                   <span>{r.host}</span>
                   <span className="sep">·</span>
                   <span className="num">{r.click_count.toLocaleString('en-US')} clicks</span>
                   <span className="sep">·</span>
-                  <Link href={`/product/${r.slug}`} className="details">see details</Link>
+                  <Link href={`/product/${r.slug}`} className="details">Details <ArrowRight size={12} /></Link>
                 </div>
               </div>
             </li>

@@ -135,3 +135,107 @@ export const Dots = ({ size = 16, className }: P) => (
     <circle cx="15" cy="10" r="1.1" fill="currentColor" stroke="none" />
   </svg>
 )
+
+/* --- site marks, same box and weight ------------------------------------- */
+
+export const Mail = ({ size = 16, className }: P) => (
+  <svg {...base(size)} className={className}>
+    <rect x="3" y="5" width="14" height="10" rx="2" />
+    <path d="m3.5 6.5 6.5 5 6.5-5" />
+  </svg>
+)
+
+export const XLogo = ({ size = 16, className }: P) => (
+  <svg {...base(size)} className={className}>
+    <path d="M4.5 3.5h3.2l7.8 13h-3.2z" />
+    <path d="M15.5 3.5 4.5 16.5" />
+  </svg>
+)
+
+export const Calendar = ({ size = 16, className }: P) => (
+  <svg {...base(size)} className={className}>
+    <rect x="3" y="4.5" width="14" height="12" rx="2" />
+    <path d="M3 8.5h14M7 3v3M13 3v3" />
+  </svg>
+)
+
+export const Clock = ({ size = 16, className }: P) => (
+  <svg {...base(size)} className={className}>
+    <circle cx="10" cy="10" r="6.5" />
+    <path d="M10 6.5V10l2.5 1.5" />
+  </svg>
+)
+
+export const Info = ({ size = 16, className }: P) => (
+  <svg {...base(size)} className={className}>
+    <circle cx="10" cy="10" r="6.5" />
+    <path d="M10 9v4.5M10 6.8v.3" />
+  </svg>
+)
+
+export const Scale = ({ size = 16, className }: P) => (
+  <svg {...base(size)} className={className}>
+    <path d="M10 3.5v13M5.5 16.5h9M4 7h12" />
+    <path d="m6 7-2.5 5a2.5 2.5 0 0 0 5 0zM14 7l-2.5 5a2.5 2.5 0 0 0 5 0z" />
+  </svg>
+)
+
+export const BarChart = ({ size = 16, className }: P) => (
+  <svg {...base(size)} className={className}>
+    <path d="M5 16.5v-5M10 16.5V6M15 16.5V9M3 16.5h14" />
+  </svg>
+)
+
+export const HelpCircle = ({ size = 16, className }: P) => (
+  <svg {...base(size)} className={className}>
+    <circle cx="10" cy="10" r="6.5" />
+    <path d="M7.8 8a2.3 2.3 0 0 1 4.4.6c0 1.5-2.2 1.7-2.2 3.1M10 14.3v.2" />
+  </svg>
+)
+
+export const Flag = ({ size = 16, className }: P) => (
+  <svg {...base(size)} className={className}>
+    <path d="M5 17V3.5M5 4h9.5l-2 3 2 3H5" />
+  </svg>
+)
+
+export const Building = ({ size = 16, className }: P) => (
+  <svg {...base(size)} className={className}>
+    <rect x="4" y="3.5" width="12" height="13" rx="1.5" />
+    <path d="M7.5 7h1M11.5 7h1M7.5 10h1M11.5 10h1M8.5 16.5v-3h3v3" />
+  </svg>
+)
+
+export const FileText = ({ size = 16, className }: P) => (
+  <svg {...base(size)} className={className}>
+    <path d="M6 3.5h6l3.5 3.5v9.5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-12a1 1 0 0 1 1-1z" />
+    <path d="M12 3.5V7h3.5M7.5 10.5h5M7.5 13.5h5" />
+  </svg>
+)
+
+export const Shield = ({ size = 16, className }: P) => (
+  <svg {...base(size)} className={className}>
+    <path d="M10 3.5 4.5 5.5v4.5c0 3.5 2.4 5.9 5.5 7 3.1-1.1 5.5-3.5 5.5-7V5.5z" />
+  </svg>
+)
+
+export const RotateCcw = ({ size = 16, className }: P) => (
+  <svg {...base(size)} className={className}>
+    <path d="M4.5 8.5A6 6 0 1 1 6.2 14.3M4.5 4.5v4h4" />
+  </svg>
+)
+
+export const LinkIcon = ({ size = 16, className }: P) => (
+  <svg {...base(size)} className={className}>
+    <path d="M8.5 11.5a3 3 0 0 0 4.2 0l2-2a3 3 0 0 0-4.2-4.2l-1 1" />
+    <path d="M11.5 8.5a3 3 0 0 0-4.2 0l-2 2a3 3 0 0 0 4.2 4.2l1-1" />
+  </svg>
+)
+
+export const ArrowRight = ({ size = 16, className }: P) => (
+  <svg {...base(size)} className={className}><path d="M4 10h12M11 5l5 5-5 5" /></svg>
+)
+
+export const Bolt = ({ size = 16, className }: P) => (
+  <svg {...base(size)} className={className}><path d="M11 3 5 11.5h4.5L9 17l6-8.5h-4.5z" /></svg>
+)
