@@ -33,10 +33,10 @@ export default async function TodayRail({
             rel="sponsored nofollow noopener"
             prefetch={false}
           >
-            <span className="rail-rank num">{r.rank}</span>
+            <span className="rail-rank num">#{r.rank}</span>
             <img
               className="ico"
-              style={{ width: 28, height: 28, borderRadius: 8 }}
+              style={{ width: 26, height: 26, borderRadius: 7 }}
               src={`/icon/${r.slug}`}
               alt=""
               loading="lazy"

@@ -45,9 +45,8 @@ export default function Board({
           not a tooltip: undisclosed paid ranking is blacklisted outright by EU
           UCPD Annex I point 11a, with no consumer-harm test attached. */}
       <p className="disclosure">
-        <strong>Paid rankings.</strong> Every listing is an advertisement. Position is set only
-        by the amount paid, highest first. No editorial judgement, no votes.{' '}
-        <Link href="/rules">How ranking works</Link>
+        <strong>Paid rankings.</strong> Every listing is an advertisement, sorted by amount paid
+        and nothing else. <Link href="/rules">How ranking works</Link>
       </p>
 
       <ul className="board">
@@ -75,7 +74,7 @@ export default function Board({
                 currency={currency}
               />
 
-              <span className="rank num">{r.rank}</span>
+              <span className="rank num">#{r.rank}</span>
 
               <img className="ico" src={`/icon/${r.slug}`} alt="" loading="lazy" width={40} height={40} />
 
@@ -108,8 +107,8 @@ export default function Board({
                           minor={convertFromBase(Math.round(shown / r.click_count), currency, rate)}
                           currency={currency}
                           decimals
-                        />{' '}
-                        a click
+                        />
+                        /click
                       </span>
                     </>
                   )}

@@ -3,7 +3,8 @@ import ClaimPanel from '@/components/ClaimPanel'
 import TodayRail from '@/components/TodayRail'
 import Board from '@/components/Board'
 import { Trophy } from '@/components/icons'
-import { getBoard, priceToLead, getTotalsByCategory } from '@/lib/rank'
+import { getBoard, priceToLead, getTotalsByCategory, findListingBySlugAny } from '@/lib/rank'
+import { reconcileDodoPayment, reconcileListing, type Reconciled } from '@/lib/payments'
 import { getRates } from '@/lib/fx'
 import { getDisplayCurrency } from '@/lib/session'
 import { CATEGORIES, MIN_FIRST_PAYMENT_MINOR } from '@/lib/config'
@@ -12,7 +13,14 @@ export const dynamic = 'force-dynamic'
 
 const PAGE_SIZE = 50
 
-type Search = { scope?: string; category?: string; page?: string; claimed?: string }
+type Search = {
+  scope?: string
+  category?: string
+  page?: string
+  claimed?: string
+  payment_id?: string
+  status?: string
+}
 
 /**
  * 1 2 3 4 … 60 near the start, 1 … 57 58 59 60 near the end, 1 … 29 30 31 … 60
@@ -32,6 +40,26 @@ export default async function Page({ searchParams }: { searchParams: Promise<Sea
   const page = Math.max(1, Number(sp.page) || 1)
 
   const [{ rates }, currency] = await Promise.all([getRates(), getDisplayCurrency()])
+
+  /**
+   * Someone just came back from checkout. Before drawing the board, ask Dodo
+   * whether their payment went through and credit it if so. The webhook is
+   * still the normal path; this is what makes a late, rejected or missing
+   * webhook a delay rather than a buyer standing on a board that ignores them.
+   * Dodo's API is the source of truth: the query string only says where to look.
+   */
+  let landed: Reconciled | null = null
+  if (sp.claimed) {
+    try {
+      if (sp.payment_id) landed = await reconcileDodoPayment(sp.payment_id)
+      if (!landed || landed.state === 'unknown') {
+        const l = await findListingBySlugAny(sp.claimed)
+        if (l) landed = await reconcileListing(l.id)
+      }
+    } catch {
+      landed = null
+    }
+  }
 
   // Sorted totals answer three questions at once: who leads (the first entry),
   // how many listings there are (the length) and what rank any amount buys.
@@ -84,6 +112,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Sea
       </div>
 
       <ClaimPanel
+        initialCategory={category ?? ''}
         minMinor={MIN_FIRST_PAYMENT_MINOR}
         currency={currency}
         rate={rate}
@@ -92,8 +121,11 @@ export default async function Page({ searchParams }: { searchParams: Promise<Sea
 
       {sp.claimed && (
         <p className="landed">
-          Payment received. Your listing moves as soon as the payment confirms, usually within a
-          few seconds.
+          {landed?.state === 'applied' || landed?.state === 'already'
+            ? 'Payment confirmed. Your listing is on the board.'
+            : landed?.state === 'not_succeeded'
+              ? `Payment is ${landed.status}. Your listing moves the moment it confirms.`
+              : 'Payment received. Your listing moves as soon as the payment confirms, usually within a few seconds.'}
         </p>
       )}
 

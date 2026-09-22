@@ -266,3 +266,113 @@ export function verifyWebhook(rawBody: string, headers: Headers): boolean {
   }
   return false
 }
+
+export type Reconciled =
+  | { state: 'applied'; listingId: string; totalMinor: number }
+  | { state: 'already'; listingId: string }
+  | { state: 'not_succeeded'; status: string }
+  | { state: 'unknown' }
+
+const reconciled = new Map<string, { at: number; result: Reconciled }>()
+
+/**
+ * Ask Dodo about one payment and credit it if it succeeded.
+ *
+ * The webhook is the normal path, and it stays the normal path. But a webhook
+ * can arrive late, be rejected by a stale secret, or be misconfigured, and the
+ * buyer is standing on the return page while that plays out. So the return
+ * page asks Dodo directly.
+ *
+ * Dodo's authenticated API is the source of truth here, not the query string.
+ * The payment id from the URL only says which record to look up; every field
+ * that moves money comes from Dodo's response. Idempotent through the unique
+ * index in applyPayment, so a webhook landing a second later credits nothing
+ * twice. Results are held for a minute so a reload does not become an API
+ * call per refresh.
+ */
+export async function reconcileDodoPayment(paymentId: string): Promise<Reconciled> {
+  if (!dodoConfigured() || !/^pay_[A-Za-z0-9_-]{6,64}$/.test(paymentId)) return { state: 'unknown' }
+
+  const hit = reconciled.get(paymentId)
+  if (hit && Date.now() - hit.at < 60_000) return hit.result
+
+  const res = await fetch(`${dodoBase()}/payments/${paymentId}`, {
+    headers: { authorization: `Bearer ${process.env.DODO_API_KEY}` },
+    signal: AbortSignal.timeout(8000),
+    cache: 'no-store',
+  })
+  if (!res.ok) return { state: 'unknown' }
+
+  const p = (await res.json()) as {
+    status?: string
+    currency?: string
+    total_amount?: number
+    metadata?: Record<string, string>
+  }
+
+  let result: Reconciled
+  if (p.status !== 'succeeded') {
+    result = { state: 'not_succeeded', status: p.status ?? 'unknown' }
+  } else {
+    const listingId = p.metadata?.listing_id
+    const amountMinor = Number(p.metadata?.amount_minor)
+    if (!listingId || !Number.isFinite(amountMinor) || amountMinor <= 0) {
+      result = { state: 'unknown' }
+    } else {
+      const applied = await applyPayment({
+        listingId,
+        provider: 'dodo',
+        providerRef: paymentId,
+        amountMinor,
+        displayCurrency: p.currency ?? undefined,
+        displayMinor: Number.isFinite(Number(p.total_amount)) ? Number(p.total_amount) : null,
+      })
+      result = applied ? { state: 'applied', ...applied } : { state: 'already', listingId }
+    }
+  }
+  // Hold only the terminal answers. A transient error or a payment still
+  // processing is asked again on the next load rather than remembered.
+  if (result.state === 'applied' || result.state === 'already') {
+    reconciled.set(paymentId, { at: Date.now(), result })
+  }
+  return result
+}
+
+/**
+ * The same thing, when all we know is which listing the buyer came back for.
+ *
+ * The return URL should carry the payment id, but a redirect is the one part
+ * of the flow we do not control, so this does not depend on it. Dodo's recent
+ * payments are scanned for succeeded ones tagged with this listing and each is
+ * applied. Idempotent for the same reason as above. Volume makes a page of
+ * twenty more than enough; when it does not, the payment id path is the one
+ * that carries the load.
+ */
+export async function reconcileListing(listingId: string): Promise<Reconciled> {
+  if (!dodoConfigured() || !/^[0-9a-f-]{36}$/.test(listingId)) return { state: 'unknown' }
+
+  const res = await fetch(`${dodoBase()}/payments?page_size=20`, {
+    headers: { authorization: `Bearer ${process.env.DODO_API_KEY}` },
+    signal: AbortSignal.timeout(8000),
+    cache: 'no-store',
+  })
+  if (!res.ok) return { state: 'unknown' }
+
+  const page = (await res.json()) as {
+    items?: { payment_id: string; status?: string; metadata?: Record<string, string> }[]
+  }
+  const mine = (page.items ?? []).filter(
+    (p) => p.status === 'succeeded' && p.metadata?.listing_id === listingId,
+  )
+  if (mine.length === 0) {
+    const pending = (page.items ?? []).find((p) => p.metadata?.listing_id === listingId)
+    return pending ? { state: 'not_succeeded', status: pending.status ?? 'unknown' } : { state: 'unknown' }
+  }
+
+  let result: Reconciled = { state: 'already', listingId }
+  for (const p of mine) {
+    const r = await reconcileDodoPayment(p.payment_id)
+    if (r.state === 'applied') result = r
+  }
+  return result
+}

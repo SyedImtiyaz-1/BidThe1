@@ -44,7 +44,7 @@
   --font-sans: system-ui, -apple-system, 'Segoe UI Variable Text', 'Segoe UI',
                Roboto, 'Helvetica Neue', Arial, sans-serif;
 
-  --page: 1180px;
+  --page: 1000px;
   color-scheme: light;
 }
 
@@ -151,7 +151,7 @@ button, input, select { font: inherit; color: inherit; }
 
 .nav-right { margin-left: auto; display: flex; align-items: center; gap: 20px; }
 .nav-links { display: flex; gap: 22px; }
-.nav-links a { font-size: 16px; font-weight: 500; color: var(--ink-2); }
+.nav-links a { font-size: 15px; font-weight: 500; color: var(--ink-2); }
 .nav-links a:hover { color: var(--ink); }
 .nav-links a[aria-current='page'] { color: var(--accent-ink); }
 
@@ -188,8 +188,8 @@ button, input, select { font: inherit; color: inherit; }
   gap: 2px;
   background: var(--paper-2);
   border-radius: var(--r-pill);
-  padding: 7px;
-  margin: 18px 0 0;
+  padding: 5px;
+  margin: 14px 0 0;
   overflow-x: auto;
   scrollbar-width: none;
 }
@@ -197,12 +197,12 @@ button, input, select { font: inherit; color: inherit; }
 .catbar a {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   white-space: nowrap;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 500;
   color: var(--ink-2);
-  padding: 9px 18px;
+  padding: 7px 14px;
   border-radius: var(--r-pill);
 }
 .catbar a:hover { color: var(--ink); background: var(--paper-3); }
@@ -217,19 +217,19 @@ button, input, select { font: inherit; color: inherit; }
 .scope {
   display: flex;
   justify-content: center;
-  margin: 42px 0 0;
+  margin: 26px 0 0;
 }
 .scope-in {
   display: inline-flex;
   gap: 2px;
   border: 1px solid var(--line);
   border-radius: var(--r-pill);
-  padding: 5px;
+  padding: 4px;
 }
 .scope-in a {
   display: inline-flex; align-items: center; gap: 8px;
-  font-size: 15px; font-weight: 600;
-  padding: 8px 20px;
+  font-size: 14px; font-weight: 600;
+  padding: 6px 16px;
   border-radius: var(--r-pill);
   color: var(--ink-2);
 }
@@ -238,16 +238,16 @@ button, input, select { font: inherit; color: inherit; }
 
 /* --- hero ----------------------------------------------------------------- */
 
-.hero { text-align: center; padding: 22px 0 0; }
+.hero { text-align: center; padding: 16px 0 0; }
 
 .head-line {
-  font-size: 60px;
+  font-size: 48px;
   line-height: 1.04;
   margin: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16px;
+  gap: 12px;
   flex-wrap: wrap;
 }
 .head-price { color: var(--accent-ink); }
@@ -303,7 +303,7 @@ button, input, select { font: inherit; color: inherit; }
 .head-cat { white-space: nowrap; }
 
 .step-btn {
-  width: 36px; height: 36px;
+  width: 28px; height: 28px;
   border: 0;
   background: var(--accent-wash);
   color: var(--accent-ink);
@@ -315,44 +315,46 @@ button, input, select { font: inherit; color: inherit; }
 .step-btn:hover { background: var(--accent-wash-2); }
 .step-btn:active { transform: translateY(1px); }
 
-.step-note { margin: 14px 0 0; font-size: 14px; color: var(--ink-3); }
+.step-note { margin: 10px 0 0; font-size: 13px; color: var(--ink-3); }
 .charge-note { margin-top: 5px; }
 
 .claim-row {
   display: flex;
-  gap: 12px;
-  margin: 26px auto 0;
-  max-width: 980px;
+  gap: 10px;
+  margin: 20px auto 0;
+  max-width: 900px;
 }
 
 .input, .select {
-  height: 60px;
+  height: 48px;
   border: 1px solid var(--line);
   border-radius: var(--r-pill);
   background: var(--paper);
-  padding: 0 24px;
-  font-size: 16px;
+  padding: 0 20px;
+  font-size: 15px;
 }
 .input { flex: 1 1 auto; min-width: 0; }
 .input::placeholder { color: var(--ink-3); }
-.select { flex: 0 0 240px; cursor: pointer; appearance: none;
+.select { flex: 0 0 230px; cursor: pointer; appearance: none;
   background-image: linear-gradient(45deg, transparent 50%, var(--ink-3) 50%),
                     linear-gradient(135deg, var(--ink-3) 50%, transparent 50%);
-  background-position: calc(100% - 26px) 55%, calc(100% - 22px) 55%;
+  background-position: calc(100% - 22px) 55%, calc(100% - 18px) 55%;
   background-size: 5px 5px, 5px 5px;
   background-repeat: no-repeat;
 }
+/* Unanswered, so it reads like the placeholder beside it. */
+.select.is-empty { color: var(--ink-3); }
 .input:focus, .select:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-color: transparent; }
 
 .btn {
-  height: 60px;
-  padding: 0 34px;
+  height: 48px;
+  padding: 0 26px;
   border: 0;
   border-radius: var(--r-pill);
   background: var(--accent);
   color: var(--accent-on);
   font-weight: 650;
-  font-size: 16px;
+  font-size: 15px;
   letter-spacing: -.011em;
   cursor: pointer;
   flex: 0 0 auto;
@@ -371,9 +373,9 @@ button, input, select { font: inherit; color: inherit; }
 
 .cols {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 300px;
-  gap: 40px;
-  padding: 34px 0 0;
+  grid-template-columns: minmax(0, 1fr) 250px;
+  gap: 32px;
+  padding: 26px 0 0;
   align-items: start;
 }
 
@@ -381,38 +383,43 @@ button, input, select { font: inherit; color: inherit; }
    size. Not the footer and not behind an icon: EU UCPD Annex I point 11a
    blacklists undisclosed paid ranking with no consumer-harm test attached. */
 .disclosure {
-  font-size: 15px;
+  font-size: 13px;
   color: var(--ink-2);
-  margin: 0 0 18px;
+  margin: 0 0 12px;
 }
 .disclosure strong { color: var(--ink); font-weight: 600; }
 .disclosure a { color: var(--accent-ink); text-decoration: underline; text-underline-offset: 2px; }
 
 /* --- board ---------------------------------------------------------------- */
 
-.board { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.board { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
 
 .row {
   display: grid;
-  grid-template-columns: 52px 60px minmax(0, 1fr) auto;
+  grid-template-columns: 44px 56px minmax(0, 1fr) auto;
   align-items: center;
-  gap: 18px;
-  padding: 18px 24px;
-  border-radius: var(--r-card);
-  background: var(--paper-2);
+  gap: 16px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--line);
   position: relative;
 }
-.row:hover { background: var(--paper-3); }
+.row:hover { background: var(--paper-2); }
 
-/* Ranks 1 to 3 differ by weight and tint, not by decoration. No medals. */
-.row.podium { background: var(--accent-wash); }
+/* Ranks 1 to 3 are cards with a tint. Everything below is a list with rules
+   between the rows, which is where the eye stops needing help. No medals. */
+.row.podium {
+  background: var(--accent-wash);
+  border-radius: var(--r-card);
+  border-bottom: 0;
+  margin-bottom: 8px;
+}
 .row.podium:hover { background: var(--accent-wash-2); }
-.row.podium .rank { color: var(--accent-ink); font-size: 24px; font-weight: 800; }
+.row.podium .rank { color: var(--accent-ink); font-size: 20px; font-weight: 800; }
 
-.rank { font-size: 19px; font-weight: 700; color: var(--ink-3); text-align: center; }
+.rank { font-size: 16px; font-weight: 700; color: var(--ink-3); text-align: center; }
 
 .ico {
-  width: 60px; height: 60px;
+  width: 56px; height: 56px;
   border-radius: var(--r-icon);
   box-shadow: inset 0 0 0 1px oklch(0 0 0 / .07);
   background: var(--paper-3);
@@ -423,9 +430,9 @@ button, input, select { font: inherit; color: inherit; }
 .row-main { min-width: 0; }
 
 .row-title {
-  font-size: 19px;
+  font-size: 17px;
   font-weight: 700;
-  line-height: 26px;
+  line-height: 24px;
   letter-spacing: -.017em;
   display: block;
   overflow: hidden;
@@ -436,33 +443,33 @@ button, input, select { font: inherit; color: inherit; }
 
 .row-tag {
   color: var(--ink-2);
-  font-size: 15px;
-  line-height: 22px;
-  margin: 2px 0 6px;
+  font-size: 14px;
+  line-height: 20px;
+  margin: 1px 0 5px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .row-meta {
-  font-size: 14px;
+  font-size: 13px;
   color: var(--ink-3);
   display: flex;
-  gap: 9px;
+  gap: 8px;
   flex-wrap: wrap;
   align-items: center;
 }
 .row-meta .sep { opacity: .45; }
 .row-meta a { color: var(--ink-2); font-weight: 500; }
 .row-meta a:hover { color: var(--accent-ink); }
-.row-meta .money { font-size: 14px; font-weight: 500; color: inherit; }
+.row-meta .money { font-size: 13px; font-weight: 500; color: inherit; }
 .row-meta .money .sym { font-size: .84em; color: inherit; }
 
 .row-money { text-align: right; min-width: 8ch; align-self: start; padding-top: 1px; }
 .money {
-  font-size: 21px;
+  font-size: 18px;
   font-weight: 700;
-  line-height: 26px;
+  line-height: 24px;
   letter-spacing: -.018em;
   color: var(--accent-ink);
   white-space: nowrap;
@@ -535,24 +542,24 @@ button, input, select { font: inherit; color: inherit; }
 /* --- today rail ----------------------------------------------------------- */
 
 .rail-head { display: flex; align-items: center; justify-content: space-between; padding: 0 0 10px; }
-.rail-title { font-size: 17px; font-weight: 700; letter-spacing: -.015em; display: flex; align-items: center; gap: 9px; }
-.rail-link { font-size: 14px; color: var(--accent-ink); font-weight: 500; }
+.rail-title { font-size: 15px; font-weight: 700; letter-spacing: -.015em; display: flex; align-items: center; gap: 9px; }
+.rail-link { font-size: 13px; color: var(--accent-ink); font-weight: 500; }
 .rail-empty { color: var(--ink-2); font-size: 15px; margin: 0; }
 
 .rail-row {
   display: grid;
-  grid-template-columns: 22px 28px minmax(0, 1fr) auto;
+  grid-template-columns: 26px 26px minmax(0, 1fr) auto;
   align-items: center;
-  gap: 12px;
-  height: 46px;
+  gap: 10px;
+  height: 40px;
   padding: 0 10px;
   margin: 0 -10px;
   border-radius: 10px;
 }
 .rail-row:hover { background: var(--paper-2); }
-.rail-rank { font-size: 14px; color: var(--ink-3); font-weight: 600; }
-.rail-name { font-size: 15px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.rail-amt .money { font-size: 15px; font-weight: 650; }
+.rail-rank { font-size: 12.5px; color: var(--ink-3); font-weight: 600; }
+.rail-name { font-size: 13.5px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rail-amt .money { font-size: 13.5px; font-weight: 650; }
 .rail-amt .money .sym { font-size: .78em; }
 
 /* --- modal ---------------------------------------------------------------- */
@@ -769,23 +776,23 @@ dialog[open] { opacity: 1; transform: none; transition: opacity .16s ease, trans
 
 @media (max-width: 1000px) {
   .cols { grid-template-columns: 1fr; gap: 34px; }
-  .head-line { font-size: 42px; gap: 12px; }
+  .head-line { font-size: 38px; gap: 10px; }
   .nav-links { display: none; }
 }
 
 @media (max-width: 680px) {
   .wrap { padding: 0 16px; }
-  .head-line { font-size: 31px; gap: 10px; }
-  .step-btn { width: 32px; height: 32px; }
+  .head-line { font-size: 28px; gap: 8px; }
+  .step-btn { width: 26px; height: 26px; }
   .claim-row { flex-wrap: wrap; gap: 10px; }
-  .input { flex: 1 1 100%; height: 54px; }
-  .select { flex: 1 1 140px; height: 54px; }
-  .btn { flex: 1 1 140px; height: 54px; padding: 0 20px; }
+  .input { flex: 1 1 100%; height: 48px; }
+  .select { flex: 1 1 140px; height: 48px; }
+  .btn { flex: 1 1 140px; height: 48px; padding: 0 20px; }
   .pill-stat { display: none; }
   .row {
     grid-template-columns: 34px 46px minmax(0, 1fr);
     row-gap: 4px; column-gap: 14px;
-    padding: 16px 18px;
+    padding: 14px 14px;
   }
   .row-main, .row-money { grid-column: 3; }
   .row-money { text-align: left; margin-top: 4px; }

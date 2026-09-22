@@ -144,6 +144,11 @@ export async function getLeader(category?: string): Promise<BoardRow | null> {
   return rows[0] ?? null
 }
 
+/** Any status. The return page has to find a listing nobody has paid for yet. */
+export async function findListingBySlugAny(slug: string) {
+  return one<Record<string, any>>(`select * from listings where slug = $1`, [slug])
+}
+
 export async function getListingBySlug(slug: string) {
   return one<Record<string, any>>(
     `select * from listings where slug = $1 and status = 'live'`,

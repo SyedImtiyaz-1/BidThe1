@@ -37,11 +37,14 @@ function rankFor(amountMinor: number, totals: number[]): number {
 }
 
 export default function ClaimPanel({
+  initialCategory,
   minMinor,
   currency,
   rate,
   totalsByCategory,
 }: {
+  /** The category in the filter bar, or '' for the whole board. */
+  initialCategory: string
   minMinor: number
   currency: string
   rate: number
@@ -53,13 +56,15 @@ export default function ClaimPanel({
   const settle = useRef<(() => void) | null>(null)
 
   const [url, setUrl] = useState('')
-  const [category, setCategory] = useState(PICKABLE_CATEGORIES[0].slug as string)
+  const [category, setCategory] = useState(initialCategory)
   const [agreed, setAgreed] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [claim, setClaim] = useState<ClaimResult | null>(null)
 
-  const totals = totalsByCategory[category] ?? []
+  // No category means the whole board: "Claim #1 for" is a rank against
+  // everyone, and the dropdown is a question still to be answered.
+  const totals = (category ? totalsByCategory[category] : totalsByCategory.all) ?? []
   const leader = totals[0] ?? 0
 
   /**
@@ -75,6 +80,17 @@ export default function ClaimPanel({
 
   const [units, setUnits] = useState(() => unitsToBeat(leader, currency, rate, minMinor))
   const [touched, setTouched] = useState(false)
+
+  /**
+   * The filter bar and this dropdown are two views of one choice. Clicking a
+   * category up there re-renders the page with a new initialCategory and the
+   * dropdown follows. The amount goes back to tracking the leader too, because
+   * the question just changed from what #1 costs here to what it costs there.
+   */
+  useEffect(() => {
+    setCategory(initialCategory)
+    setTouched(false)
+  }, [initialCategory])
 
   const amount = unitsToBase(units, currency, rate)
   const parts = moneyParts(units * unitMinor(currency), currency)
@@ -149,6 +165,7 @@ export default function ClaimPanel({
   async function startClaim() {
     setError(null)
     if (!url.trim()) { setError('Paste a link first.'); return }
+    if (!category) { setError('Choose a category.'); return }
     setBusy(true)
     try {
       const res = await fetch('/api/claim', {
@@ -218,7 +235,9 @@ export default function ClaimPanel({
       <div className="hero">
         <h1 className="head-line display">
           <span>
-            Claim #{heroRank} in <span className="head-cat">{LABEL.get(category)}</span> for
+            Claim #{heroRank}
+            {category && <> in <span className="head-cat">{LABEL.get(category)}</span></>}
+            {' '}for
           </span>
           <button
             className="step-btn"
@@ -273,7 +292,13 @@ export default function ClaimPanel({
             inputMode="url"
             aria-label="Your product link"
           />
-          <select className="select" value={category} onChange={(e) => setCategory(e.target.value)} aria-label="Category">
+          <select
+            className={`select${category ? '' : ' is-empty'}`}
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            aria-label="Category"
+          >
+            <option value="">Choose a category</option>
             {PICKABLE_CATEGORIES.map((c) => (
               <option key={c.slug} value={c.slug}>{c.label}</option>
             ))}

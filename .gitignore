@@ -7,3 +7,6 @@ next-env.d.ts
 *.tsbuildinfo
 .DS_Store
 .vercel
+
+# scratch scripts and pulled env files
+.tmp/

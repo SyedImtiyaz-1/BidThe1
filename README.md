@@ -53,6 +53,14 @@ Payments are applied by a single data-modifying CTE with `on conflict do nothing
 unique index on `(provider, provider_ref)`. That one statement gives atomicity and webhook
 idempotency together, so a retried delivery credits nothing twice.
 
+The webhook is the normal path but not the only one. When a buyer lands back on
+`/?claimed=<slug>` the page asks Dodo directly about that payment (by `payment_id` when the
+redirect carries it, otherwise by scanning recent payments tagged with the listing) and
+credits it through the same `applyPayment` statement. A late, rejected or missing webhook is
+then a delay rather than a buyer standing on a board that ignores them, and the unique index
+means the webhook landing afterwards credits nothing twice. Dodo's API is the source of truth
+in both paths; nothing in the query string moves money.
+
 The ledger credits the amount carried in the checkout's `metadata`, never the total Dodo
 reports back. Dodo is a merchant of record and may settle in another currency, in which case
 its reported total is in that currency's minor unit. Treating USD cents as paise would inflate
@@ -64,9 +72,11 @@ a rank by roughly 85 times.
       enabled. Put its id in `DODO_PRODUCT_ID`. The server sets the amount on every checkout,
       so the buyer never picks their own price.
 - [ ] Webhook endpoint registered at `/api/webhooks/dodo` with the signing secret in
-      `DODO_WEBHOOK_SECRET`. Subscribe to `payment.succeeded`, the refund events and the
-      dispute events. Without the refund and dispute events a charged-back listing keeps a
-      rank it no longer paid for.
+      `DODO_WEBHOOK_SECRET`. The secret is per endpoint and lives in Dodo, so copy it from
+      there (`GET /webhooks/{id}/secret`, or the dashboard); a made-up value means every
+      delivery is answered `400 bad signature` and nothing is ever credited. Subscribe to
+      `payment.succeeded`, the refund events and the dispute events. Without the refund and
+      dispute events a charged-back listing keeps a rank it no longer paid for.
 - [ ] Describe the business as advertising placement, which is what it is. Keep auction
       vocabulary out of the product and the merchant application.
 - [ ] Vercel Pro. Hobby's terms prohibit "any method of requesting or processing payment from
