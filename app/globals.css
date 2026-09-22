@@ -266,12 +266,12 @@ button, input, select { font: inherit; color: inherit; }
      on the system UI font. */
   font-family: var(--font-display), var(--font-sans);
   font-size: 48px;
-  line-height: 1.04;
+  line-height: 1.12;
   margin: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 16px;
   flex-wrap: wrap;
 }
 .head-price { color: var(--accent-ink); }
@@ -321,6 +321,7 @@ button, input, select { font: inherit; color: inherit; }
   margin-right: .04em;
 }
 .head-cat { white-space: nowrap; }
+.head-line > span:first-child { letter-spacing: -.02em; word-spacing: .04em; }
 
 .step-btn {
   width: 28px; height: 28px;
