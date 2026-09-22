@@ -95,6 +95,8 @@ export default function Board({
                   <span>{r.host}</span>
                   <span className="sep">·</span>
                   <span className="num">{r.click_count.toLocaleString('en-US')} clicks</span>
+                  <span className="sep">·</span>
+                  <Link href={`/product/${r.slug}`} className="details">see details</Link>
                   {r.click_count > 0 && shown > 0 && (
                     <>
                       <span className="sep">·</span>

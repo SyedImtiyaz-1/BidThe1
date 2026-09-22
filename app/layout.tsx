@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Script from 'next/script'
 import { cookies } from 'next/headers'
 import './globals.css'
 import Nav from '@/components/Nav'
@@ -105,6 +106,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body>
         <Nav />
         <main>{children}</main>
+        {/* The AskMySite chat bubble. lazyOnload: it fetches after the page is
+            idle, so a third-party script never sits between a visitor and the
+            board, which is what the speed work was for. */}
+        <Script
+          src="https://askmysite.ai/widget.js"
+          data-tenant-id="96989ffa-38e7-47ef-bb54-5426ea27efaf"
+          strategy="lazyOnload"
+        />
         <Footer />
         <Presence />
       </body>

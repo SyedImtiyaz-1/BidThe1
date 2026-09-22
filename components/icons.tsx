@@ -58,3 +58,80 @@ export const Trophy = ({ size = 14, className }: P) => (
     <path d="M10 10v3.4M7.4 16.5h5.2l-.5-3H7.9Z" />
   </svg>
 )
+
+/* --- category marks, same box and weight --------------------------------- */
+
+export const Grid = ({ size = 16, className }: P) => (
+  <svg {...base(size)} className={className}>
+    <rect x="3.5" y="3.5" width="5.5" height="5.5" rx="1.2" />
+    <rect x="11" y="3.5" width="5.5" height="5.5" rx="1.2" />
+    <rect x="3.5" y="11" width="5.5" height="5.5" rx="1.2" />
+    <rect x="11" y="11" width="5.5" height="5.5" rx="1.2" />
+  </svg>
+)
+
+export const GridPlus = ({ size = 16, className }: P) => (
+  <svg {...base(size)} className={className}>
+    <rect x="3.5" y="3.5" width="5.5" height="5.5" rx="1.2" />
+    <rect x="11" y="3.5" width="5.5" height="5.5" rx="1.2" />
+    <rect x="3.5" y="11" width="5.5" height="5.5" rx="1.2" />
+    <path d="M13.75 11.25v5M11.25 13.75h5" />
+  </svg>
+)
+
+export const Sparkle = ({ size = 16, className }: P) => (
+  <svg {...base(size)} className={className}>
+    <path d="M10 3.5c.4 3.4 2.6 5.6 6 6-3.4.4-5.6 2.6-6 6-.4-3.4-2.6-5.6-6-6 3.4-.4 5.6-2.6 6-6Z" />
+  </svg>
+)
+
+export const Code = ({ size = 16, className }: P) => (
+  <svg {...base(size)} className={className}>
+    <path d="m6.5 6.5-4 3.5 4 3.5M13.5 6.5l4 3.5-4 3.5M11.5 4.5l-3 11" />
+  </svg>
+)
+
+export const Megaphone = ({ size = 16, className }: P) => (
+  <svg {...base(size)} className={className}>
+    <path d="M3.5 8.5v3a1 1 0 0 0 1 1H6l6 3.5V4L6 7.5H4.5a1 1 0 0 0-1 1Z" />
+    <path d="M14.5 8a2.6 2.6 0 0 1 0 4M6.5 12.5l1 4" />
+  </svg>
+)
+
+export const Shapes = ({ size = 16, className }: P) => (
+  <svg {...base(size)} className={className}>
+    <rect x="3.5" y="10.5" width="6" height="6" rx="1.2" />
+    <circle cx="13.5" cy="13.5" r="3" />
+    <path d="M10 3.5l3.5 5.5h-7z" />
+  </svg>
+)
+
+export const ListCheck = ({ size = 16, className }: P) => (
+  <svg {...base(size)} className={className}>
+    <path d="M9 5.5h7.5M9 10h7.5M9 14.5h7.5" />
+    <path d="m3.5 5.5 1 1 2-2M3.5 10l1 1 2-2M3.5 14.5l1 1 2-2" />
+  </svg>
+)
+
+export const Banknote = ({ size = 16, className }: P) => (
+  <svg {...base(size)} className={className}>
+    <rect x="2.5" y="5.5" width="15" height="9" rx="1.6" />
+    <circle cx="10" cy="10" r="2.2" />
+    <path d="M5.5 8v4M14.5 8v4" />
+  </svg>
+)
+
+export const Phone = ({ size = 16, className }: P) => (
+  <svg {...base(size)} className={className}>
+    <rect x="6" y="2.5" width="8" height="15" rx="1.8" />
+    <path d="M9 14.75h2" />
+  </svg>
+)
+
+export const Dots = ({ size = 16, className }: P) => (
+  <svg {...base(size)} className={className}>
+    <circle cx="5" cy="10" r="1.1" fill="currentColor" stroke="none" />
+    <circle cx="10" cy="10" r="1.1" fill="currentColor" stroke="none" />
+    <circle cx="15" cy="10" r="1.1" fill="currentColor" stroke="none" />
+  </svg>
+)

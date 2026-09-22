@@ -419,3 +419,107 @@ export async function getCategoryBoards(
 
   return [...out.values()]
 }
+
+export type Standing = { rank: number; count: number }
+export type Neighbour = { slug: string; title: string; amountMinor: number; rank: number }
+export type ListingDetail = {
+  listing: Record<string, any>
+  overall: Standing | null
+  category: Standing | null
+  todayOverall: Standing | null
+  todayCategory: Standing | null
+  todayMinor: number
+  lastClaimedAt: string | null
+  neighbours: Neighbour[]
+}
+
+/**
+ * Everything the product page says about one listing, in three statements.
+ *
+ * Ranks are never stored, so each standing is a window over the live board:
+ * overall and within the category, all-time and since midnight UTC. The
+ * neighbours come out of the same all-time window, two either side in the
+ * category, which is what makes "also in Design" honest rather than a
+ * hand-picked set.
+ */
+export async function getListingDetail(slug: string): Promise<ListingDetail | null> {
+  const listing = await one<Record<string, any>>(
+    `select * from listings where slug = $1 and status = 'live'`,
+    [slug],
+  )
+  if (!listing) return null
+
+  const [allTime, today, last] = await Promise.all([
+    q<Record<string, any>>(
+      `with ranked as (
+         select l.id, l.slug, l.title, l.total_minor, l.category,
+                row_number() over (order by l.total_minor desc, l.first_reached_at asc) as overall_rank,
+                count(*)     over ()                                                   as overall_count,
+                row_number() over (partition by l.category
+                                   order by l.total_minor desc, l.first_reached_at asc) as cat_rank,
+                count(*)     over (partition by l.category)                            as cat_count
+           from listings l
+          where l.status = 'live' and l.total_minor > 0
+       ),
+       me as (select * from ranked where id = $1)
+       select r.*, (r.id = me.id) as is_me
+         from ranked r, me
+        where r.category = me.category
+          and r.cat_rank between me.cat_rank - 2 and me.cat_rank + 2
+        order by r.cat_rank`,
+      [listing.id],
+    ),
+    q<Record<string, any>>(
+      `with today as (
+         select p.listing_id, sum(p.amount_minor) as today_minor, min(p.created_at) as first_today
+           from payments p
+          where p.status = 'confirmed'
+            and p.created_at >= (date_trunc('day', now() at time zone 'utc') at time zone 'utc')
+          group by p.listing_id
+       ),
+       ranked as (
+         select l.id, l.category, t.today_minor,
+                row_number() over (order by t.today_minor desc, t.first_today asc) as overall_rank,
+                count(*)     over ()                                               as overall_count,
+                row_number() over (partition by l.category
+                                   order by t.today_minor desc, t.first_today asc) as cat_rank,
+                count(*)     over (partition by l.category)                        as cat_count
+           from listings l
+           join today t on t.listing_id = l.id
+          where l.status = 'live'
+       )
+       select * from ranked where id = $1`,
+      [listing.id],
+    ),
+    one<{ last_at: string | null }>(
+      `select max(created_at) as last_at from payments where listing_id = $1 and status = 'confirmed'`,
+      [listing.id],
+    ),
+  ])
+
+  const me = allTime.find((r) => r.is_me)
+  const t = today[0]
+  return {
+    listing,
+    overall: me ? { rank: num(me.overall_rank), count: num(me.overall_count) } : null,
+    category: me ? { rank: num(me.cat_rank), count: num(me.cat_count) } : null,
+    todayOverall: t ? { rank: num(t.overall_rank), count: num(t.overall_count) } : null,
+    todayCategory: t ? { rank: num(t.cat_rank), count: num(t.cat_count) } : null,
+    todayMinor: t ? num(t.today_minor) : 0,
+    lastClaimedAt: last?.last_at ? new Date(last.last_at).toISOString() : null,
+    neighbours: allTime
+      .filter((r) => !r.is_me)
+      .map((r) => ({ slug: r.slug, title: r.title, amountMinor: num(r.total_minor), rank: num(r.cat_rank) })),
+  }
+}
+
+/** Every live listing slug, for the sitemap. */
+export async function getLiveSlugs(limit = 5000): Promise<{ slug: string; updated: string }[]> {
+  const rows = await q<{ slug: string; updated: string }>(
+    `select l.slug, coalesce(l.first_reached_at, l.created_at) as updated
+       from listings l where l.status = 'live' and l.total_minor > 0
+      order by l.total_minor desc limit $1`,
+    [limit],
+  )
+  return rows.map((r) => ({ slug: r.slug, updated: new Date(r.updated).toISOString() }))
+}

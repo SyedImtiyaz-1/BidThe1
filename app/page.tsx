@@ -2,7 +2,8 @@ import Link from 'next/link'
 import ClaimPanel from '@/components/ClaimPanel'
 import TodayRail from '@/components/TodayRail'
 import Board from '@/components/Board'
-import { Trophy } from '@/components/icons'
+import { Trophy, GridPlus } from '@/components/icons'
+import CategoryIcon from '@/components/CategoryIcon'
 import { getBoard, priceToLead, getTotalsByCategory, findListingBySlugAny } from '@/lib/rank'
 import { reconcileDodoPayment, reconcileListing, type Reconciled } from '@/lib/payments'
 import { getRates } from '@/lib/fx'
@@ -88,16 +89,24 @@ export default async function Page({ searchParams }: { searchParams: Promise<Sea
 
   return (
     <div className="wrap">
-      <nav className="catbar">
-        {CATEGORIES.map((c) => (
-          <Link
-            key={c.slug}
-            href={qs({ category: c.slug === 'all' ? undefined : c.slug, page: undefined })}
-            aria-current={(sp.category ?? 'all') === c.slug}
-          >
-            {c.label}
-          </Link>
-        ))}
+      <nav className="catbar" aria-label="Categories">
+        <div className="catbar-scroll">
+          {CATEGORIES.map((c) => (
+            <Link
+              key={c.slug}
+              href={qs({ category: c.slug === 'all' ? undefined : c.slug, page: undefined })}
+              aria-current={(sp.category ?? 'all') === c.slug}
+            >
+              <CategoryIcon slug={c.slug} />
+              {c.label}
+            </Link>
+          ))}
+        </div>
+        {/* Pinned over the scrolling list, behind a fade, so the way to every
+            category is always visible however far the bar has been scrolled. */}
+        <Link href="/categories" className="catbar-explore">
+          <GridPlus /> Explore
+        </Link>
       </nav>
 
       <div className="scope">

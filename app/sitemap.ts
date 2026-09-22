@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next'
 import { SITE_URL, PICKABLE_CATEGORIES } from '@/lib/config'
-import { getDays } from '@/lib/rank'
+import { getDays, getLiveSlugs } from '@/lib/rank'
 
 export const revalidate = 3600
 
@@ -14,7 +14,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/rules`, lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
     { url: `${SITE_URL}/about`, lastModified: now, changeFrequency: 'weekly', priority: 0.6 },
     { url: `${SITE_URL}/faq`, lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
-    { url: `${SITE_URL}/ask`, lastModified: now, changeFrequency: 'monthly', priority: 0.5 },
     { url: `${SITE_URL}/stats`, lastModified: now, changeFrequency: 'hourly', priority: 0.5 },
     { url: `${SITE_URL}/terms`, lastModified: now, changeFrequency: 'yearly', priority: 0.2 },
     { url: `${SITE_URL}/privacy`, lastModified: now, changeFrequency: 'yearly', priority: 0.2 },
@@ -29,6 +28,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'daily',
       priority: 0.7,
     })
+  }
+
+  try {
+    // One page per listing. These carry the standing sentence search engines
+    // index, so they matter more than the archive.
+    for (const l of await getLiveSlugs()) {
+      pages.push({
+        url: `${SITE_URL}/product/${l.slug}`,
+        lastModified: new Date(l.updated),
+        changeFrequency: 'daily',
+        priority: 0.6,
+      })
+    }
+  } catch {
+    // Same as below: a shorter sitemap beats none.
   }
 
   try {

@@ -184,35 +184,55 @@ button, input, select { font: inherit; color: inherit; }
 /* --- category bar --------------------------------------------------------- */
 
 .catbar {
+  position: relative;
   display: flex;
-  gap: 2px;
+  align-items: center;
   background: var(--paper-2);
   border-radius: var(--r-pill);
   padding: 5px;
   margin: 14px 0 0;
+}
+.catbar-scroll {
+  display: flex;
+  gap: 2px;
+  flex: 1 1 auto;
+  min-width: 0;
   overflow-x: auto;
   scrollbar-width: none;
+  /* room so the last pill can scroll out from under the pinned link */
+  padding-right: 120px;
 }
-.catbar::-webkit-scrollbar { display: none; }
+.catbar-scroll::-webkit-scrollbar { display: none; }
 .catbar a {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
   white-space: nowrap;
   font-size: 14px;
-  font-weight: 500;
-  color: var(--ink-2);
+  font-weight: 600;
+  color: var(--ink);
   padding: 7px 14px;
   border-radius: var(--r-pill);
 }
-.catbar a:hover { color: var(--ink); background: var(--paper-3); }
+/* The mark carries the accent; the word stays ink, so the bar reads as a
+   list of names with a coloured cue beside each, not a row of coloured words. */
+.catbar a svg { color: var(--accent-ink); flex: 0 0 auto; }
+.catbar a:hover { background: var(--paper-3); }
 .catbar a[aria-current='true'] {
   background: var(--accent);
   color: var(--accent-on);
-  font-weight: 600;
 }
-
-/* --- scope toggle --------------------------------------------------------- */
+.catbar a[aria-current='true'] svg { color: inherit; }
+.catbar-explore {
+  position: absolute;
+  top: 5px; right: 5px; bottom: 5px;
+  padding: 0 16px 0 48px;
+  color: var(--accent-ink) !important;
+  background: linear-gradient(90deg, transparent, var(--paper-2) 40px);
+  border-radius: 0 var(--r-pill) var(--r-pill) 0;
+}
+.catbar-explore:hover { background: linear-gradient(90deg, transparent, var(--paper-2) 40px); color: var(--accent-strong) !important; }
+.catbar-explore svg { color: inherit !important; }
 
 .scope {
   display: flex;
@@ -379,10 +399,75 @@ button, input, select { font: inherit; color: inherit; }
   align-items: start;
 }
 
-/* --- ask ------------------------------------------------------------------ */
+/* --- product page --------------------------------------------------------- */
 
-.ask-frame { display: block; border: 0; border-radius: 12px; margin: 18px 0 10px; background: var(--paper-2); }
-.ask-note { font-size: 13px; color: var(--ink-3); }
+.product { padding-top: 18px; }
+.crumbs { font-size: 13.5px; color: var(--ink-3); display: flex; gap: 8px; align-items: center; }
+.crumbs a { color: var(--ink-2); }
+.crumbs a:hover { color: var(--accent-ink); }
+.crumbs .sep { opacity: .5; }
+
+.product-head {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: start;
+  margin: 16px 0 0;
+  padding: 20px 22px;
+  border-radius: var(--r-card);
+  background: var(--paper-2);
+}
+.product-ico { width: 72px; height: 72px; }
+.product-main { min-width: 0; }
+.product-head h1 { font-size: 26px; letter-spacing: -.025em; margin: 0 0 6px; line-height: 1.15; }
+.product-tag { font-size: 15px; color: var(--ink-2); margin: 10px 0 0; max-width: 62ch; }
+.product-actions { display: flex; gap: 8px; margin: 16px 0 0; }
+.product-actions .btn { height: 40px; padding: 0 20px; font-size: 14px; }
+.product-money { text-align: right; display: grid; gap: 2px; justify-items: end; }
+.product-money .money { font-size: 26px; line-height: 30px; }
+.details { color: var(--accent-ink) !important; font-weight: 500; }
+
+/* Four standings, each a link to the board it describes. Rank is the number,
+   everything else is the sentence around it. */
+.stands {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
+  margin: 12px 0 0;
+}
+.stand {
+  display: grid;
+  gap: 2px;
+  padding: 16px 18px;
+  border-radius: var(--r-card);
+  border: 1px solid var(--line);
+  color: inherit;
+  text-decoration: none;
+}
+.stand:hover { background: var(--paper-2); border-color: var(--line-strong); }
+.stand-k { font-size: 12.5px; font-weight: 600; letter-spacing: .02em; text-transform: uppercase; color: var(--ink-3); }
+.stand-v { font-size: 30px; font-weight: 800; letter-spacing: -.03em; color: var(--accent-ink); line-height: 1.1; margin-top: 4px; }
+.stand-none { color: var(--ink-3); font-weight: 600; }
+.stand-of { font-size: 13.5px; color: var(--ink-2); }
+.stand-go { font-size: 13px; color: var(--accent-ink); font-weight: 500; margin-top: 8px; }
+
+.about-rank { margin: 34px 0 0; }
+.about-rank h2 { font-size: 20px; letter-spacing: -.02em; margin: 0 0 8px; }
+.about-rank .lead { font-size: 15px; color: var(--ink-2); margin: 0 0 18px; }
+.qa { padding: 14px 0; border-top: 1px solid var(--line); }
+.qa h3 { font-size: 15px; font-weight: 600; margin: 0 0 6px; }
+.qa p { font-size: 14.5px; color: var(--ink-2); margin: 0; line-height: 1.55; }
+.take { margin: 20px 0 0; }
+.take .btn { display: inline-flex; align-items: center; height: 44px; padding: 0 22px; font-size: 15px; color: var(--accent-on); text-decoration: none; }
+
+.also { margin: 34px 0 0; max-width: 620px; }
+
+@media (max-width: 680px) {
+  .product-head { grid-template-columns: 56px minmax(0, 1fr); }
+  .product-ico { width: 56px; height: 56px; }
+  .product-money { grid-column: 1 / -1; justify-items: start; text-align: left; }
+  .product-head h1 { font-size: 22px; }
+}
 
 /* --- board ---------------------------------------------------------------- */
 
