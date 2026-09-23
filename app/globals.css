@@ -82,7 +82,11 @@ body {
   font-family: var(--font-sans);
   font-optical-sizing: auto;
   font-feature-settings: 'liga' 1, 'calt' 1;
-  font-synthesis-weight: none;
+  /* No font-synthesis-weight: none here. Android resolves system-ui to Roboto,
+     which ships Regular, Medium and Bold and nothing heavier. Forbidding
+     synthesis there means a weight the family lacks renders at regular, so
+     every heading came out unbolded on a real phone while looking right in
+     desktop emulation, which uses the desktop's own fonts. */
   -webkit-font-smoothing: antialiased;
   font-size: 15px;
   line-height: 22px;
@@ -101,7 +105,7 @@ body {
 /* Display sizes need more negative tracking than body copy in the same face,
    which is the only thing that changes at the headline. */
 .display {
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: -.028em;
   line-height: 1.02;
 }
@@ -119,7 +123,7 @@ button, input, select { font: inherit; color: inherit; }
 
 .wordmark {
   font-size: 21px;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: -.035em;
   display: inline-flex;
   align-items: center;
@@ -391,7 +395,7 @@ button, input, select { font: inherit; color: inherit; }
   border-radius: var(--r-pill);
   background: var(--accent);
   color: var(--accent-on);
-  font-weight: 650;
+  font-weight: 600;
   font-size: 15px;
   letter-spacing: -.011em;
   cursor: pointer;
@@ -464,7 +468,7 @@ button, input, select { font: inherit; color: inherit; }
 }
 .stand:hover { background: var(--paper-2); border-color: var(--line-strong); }
 .stand-k { font-size: 12.5px; font-weight: 600; letter-spacing: .02em; text-transform: uppercase; color: var(--ink-3); }
-.stand-v { font-size: 30px; font-weight: 800; letter-spacing: -.03em; color: var(--accent-ink); line-height: 1.1; margin-top: 4px; }
+.stand-v { font-size: 30px; font-weight: 700; letter-spacing: -.03em; color: var(--accent-ink); line-height: 1.1; margin-top: 4px; }
 .stand-none { color: var(--ink-3); font-weight: 600; }
 .stand-of { font-size: 13.5px; color: var(--ink-2); }
 .stand-go { font-size: 13px; color: var(--accent-ink); font-weight: 500; margin-top: 8px; }
@@ -511,7 +515,7 @@ button, input, select { font: inherit; color: inherit; }
   margin-bottom: 8px;
 }
 .row.podium:hover { background: var(--accent-wash-2); }
-.row.podium .rank { color: var(--accent-ink); font-size: 20px; font-weight: 800; }
+.row.podium .rank { color: var(--accent-ink); font-size: 20px; font-weight: 700; }
 
 .rank { font-size: 16px; font-weight: 700; color: var(--ink-3); text-align: center; }
 
@@ -656,7 +660,7 @@ button, input, select { font: inherit; color: inherit; }
 .rail-row:hover { background: var(--paper-2); }
 .rail-rank { font-size: 12.5px; color: var(--ink-3); font-weight: 600; }
 .rail-name { font-size: 13.5px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.rail-amt .money { font-size: 13.5px; font-weight: 650; }
+.rail-amt .money { font-size: 13.5px; font-weight: 600; }
 
 
 /* --- modal ---------------------------------------------------------------- */
@@ -711,7 +715,7 @@ dialog[open] { opacity: 1; transform: none; transition: opacity .16s ease, trans
 /* --- prose pages ---------------------------------------------------------- */
 
 .prose { max-width: 66ch; margin: 0 auto; padding: 48px 0 0; }
-.prose h1 { font-size: 42px; font-weight: 800; line-height: 46px; letter-spacing: -.03em; margin: 0 0 10px; }
+.prose h1 { font-size: 42px; font-weight: 700; line-height: 46px; letter-spacing: -.03em; margin: 0 0 10px; }
 .prose h2 { font-size: 20px; font-weight: 700; line-height: 28px; letter-spacing: -.017em; margin: 34px 0 8px; }
 .prose p, .prose li { color: var(--ink-2); }
 .prose ol, .prose ul { padding-left: 20px; }
@@ -726,7 +730,7 @@ dialog[open] { opacity: 1; transform: none; transition: opacity .16s ease, trans
   padding: 18px 20px;
 }
 .stat .k { font-size: 13px; color: var(--ink-3); margin-bottom: 6px; }
-.stat .v { font-size: 28px; font-weight: 800; letter-spacing: -.025em; color: var(--accent-ink); }
+.stat .v { font-size: 28px; font-weight: 700; letter-spacing: -.025em; color: var(--accent-ink); }
 
 /* --- daily boards -------------------------------------------------------- */
 
@@ -1060,10 +1064,10 @@ dialog[open] { opacity: 1; transform: none; transition: opacity .16s ease, trans
 
   /* Lighter. 800 at this size is shouting, and a phone screen is close to
      the eye in a way a monitor is not. */
-  .head-line { font-weight: 720; letter-spacing: -.022em; }
-  .row-title { font-weight: 640; }
-  .money { font-weight: 660; }
-  .cat-head h1, .prose h1 { font-weight: 720; }
+  .head-line { font-weight: 700; letter-spacing: -.022em; }
+  .row-title { font-weight: 600; }
+  .money { font-weight: 700; }
+  .cat-head h1, .prose h1 { font-weight: 700; }
 
   /* Shorter rows. One line of description, one line of meta, no wrapping to
      a third. The host repeats what the title already says, so it goes. */
