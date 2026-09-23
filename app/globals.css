@@ -897,19 +897,36 @@ dialog[open] { opacity: 1; transform: none; transition: opacity .16s ease, trans
 
 /* --- theme wipe ----------------------------------------------------------- */
 
-/* The incoming theme is revealed from the top down, over a still copy of the
-   old one. Only the new snapshot moves: animating both makes the midpoint go
-   translucent and the text underneath show through. */
+/* The incoming theme is revealed over a still copy of the old one. Only the
+   new snapshot moves: animating both makes the midpoint go translucent and the
+   text underneath show through.
+
+   Direction carries the meaning. Night falls from the top, morning rises from
+   the bottom, so the gesture matches what is being asked for. */
 :root[data-theme-switch]::view-transition-old(root) {
   animation: none;
   z-index: 0;
 }
 :root[data-theme-switch]::view-transition-new(root) {
-  animation: theme-wipe 560ms cubic-bezier(.65, 0, .35, 1);
   z-index: 1;
+  /* Longhands, not the shorthand. A shorthand with no animation-name gets
+     minified to `animation: none`, which throws the duration and easing away
+     and leaves the later animation-name rule running in zero time. */
+  animation-duration: 560ms;
+  animation-timing-function: cubic-bezier(.65, 0, .35, 1);
+  animation-fill-mode: both;
 }
-@keyframes theme-wipe {
+:root[data-theme-switch='down']::view-transition-new(root) { animation-name: theme-wipe-down; }
+:root[data-theme-switch='up']::view-transition-new(root)   { animation-name: theme-wipe-up; }
+
+/* to dark: closes over the page from above */
+@keyframes theme-wipe-down {
   from { clip-path: inset(0 0 100% 0); }
+  to   { clip-path: inset(0 0 0 0); }
+}
+/* to light: rises from below */
+@keyframes theme-wipe-up {
+  from { clip-path: inset(100% 0 0 0); }
   to   { clip-path: inset(0 0 0 0); }
 }
 
@@ -924,7 +941,7 @@ dialog[open] { opacity: 1; transform: none; transition: opacity .16s ease, trans
 
 @media (prefers-reduced-motion: reduce) {
   *, ::view-transition-group(*) { animation-duration: .01ms !important; transition-duration: .01ms !important; }
-  :root[data-theme-switch]::view-transition-new(root) { animation: none; }
+  :root[data-theme-switch]::view-transition-new(root) { animation-name: none; }
   .dot { animation: none; }
 }
 

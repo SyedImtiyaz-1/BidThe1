@@ -32,7 +32,9 @@ export default function ThemeToggle() {
         }
 
         /**
-         * The new theme wipes down over the old one.
+         * The new theme wipes in over the old one, and which way it travels
+         * says which way the day is going: night falls from the top, morning
+         * comes up from the bottom.
          *
          * The flag has to be set before the transition starts, because that is
          * when the outgoing snapshot is taken. It does two things while it is
@@ -41,7 +43,7 @@ export default function ThemeToggle() {
          * names, which would otherwise be lifted out of the snapshot and
          * cross-fade on their own while the page behind them wiped.
          */
-        root.dataset.themeSwitch = ''
+        root.dataset.themeSwitch = next === 'dark' ? 'down' : 'up'
         const t = document.startViewTransition(apply)
         t.finished.finally(() => { delete root.dataset.themeSwitch })
       }}
