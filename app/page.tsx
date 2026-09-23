@@ -15,6 +15,7 @@ const PAGE_SIZE = 50
 
 type Search = {
   scope?: string
+  rail?: string
   category?: string
   page?: string
   claimed?: string
@@ -38,6 +39,11 @@ export default async function Page({ searchParams }: { searchParams: Promise<Sea
   const scope: 'all' | 'today' = sp.scope === 'today' ? 'today' : 'all'
   const category = sp.category && sp.category !== 'all' ? sp.category : undefined
   const page = Math.max(1, Number(sp.page) || 1)
+
+  // The rail shows the other board by default, and its own link switches only
+  // itself: following it should not move the board somebody is reading.
+  const railScope: 'all' | 'today' =
+    sp.rail === 'today' ? 'today' : sp.rail === 'all' ? 'all' : scope === 'today' ? 'all' : 'today'
 
   /**
    * Someone just came back from checkout. Before drawing the board, ask Dodo
@@ -77,7 +83,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Sea
 
   const qs = (patch: Record<string, string | undefined>) => {
     const p = new URLSearchParams()
-    const merged = { scope: sp.scope, category: sp.category, page: sp.page, ...patch }
+    const merged = { scope: sp.scope, rail: sp.rail, category: sp.category, page: sp.page, ...patch }
     for (const [k, v] of Object.entries(merged)) if (v) p.set(k, v)
     const s = p.toString()
     return s ? `/?${s}` : '/'
@@ -163,7 +169,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Sea
           )}
         </div>
 
-        <SideRail boardScope={scope} />
+        <SideRail scope={railScope} flipHref={qs({ rail: railScope === 'today' ? 'all' : 'today' })} />
       </div>
     </div>
   )

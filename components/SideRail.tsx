@@ -6,15 +6,21 @@ import { getBoard } from '@/lib/rank'
 /**
  * The board you are not looking at.
  *
- * Whichever scope the page is showing, the rail offers the other one, so the
- * two are never the same list twice and "See all" always goes somewhere new.
+ * It opens on whichever scope the page is not showing, so the two are never
+ * the same list twice. Its own link switches the rail and nothing else:
+ * following it should not move the board somebody is reading.
  */
-export default async function SideRail({ boardScope }: { boardScope: 'all' | 'today' }) {
-  const scope = boardScope === 'today' ? 'all' : 'today'
+export default async function SideRail({
+  scope,
+  flipHref,
+}: {
+  scope: 'all' | 'today'
+  flipHref: string
+}) {
   const rows = await getBoard({ scope, limit: 10 })
 
   const title = scope === 'today' ? 'Today’s ranking' : 'All-time ranking'
-  const href = scope === 'today' ? '/?scope=today' : '/'
+  const href = flipHref
   const empty =
     scope === 'today'
       ? 'Nobody has claimed a rank since midnight UTC.'
