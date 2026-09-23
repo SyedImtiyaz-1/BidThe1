@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import Script from 'next/script'
 import { Suspense } from 'react'
 import Analytics from '@/components/Analytics'
@@ -19,6 +19,22 @@ const poppins = Poppins({
   display: 'swap',
   variable: '--font-display',
 })
+
+/**
+ * Pinch zoom is off, as asked. Two caveats worth knowing: iOS Safari has
+ * ignored user-scalable since iOS 10, so this binds on Android and not on
+ * iPhone, and blocking zoom costs anyone who needs to enlarge text.
+ *
+ * The jarring zoom most people mean by this is a different thing: iOS zooms
+ * the page whenever a focused input is under 16px. That is fixed by sizing the
+ * controls properly, below, and that fix works on every platform.
+ */
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+}
 
 export const metadata: Metadata = {
   // Everything relative below resolves against this, including the OG image.
