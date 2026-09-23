@@ -12,7 +12,7 @@ export type Meta = {
   kind: ListingKind
 }
 
-export type ListingKind = 'website' | 'app'
+export type ListingKind = 'website' | 'app' | 'profile'
 
 /**
  * Hosts where the page is, by definition, an app listing.
@@ -34,6 +34,29 @@ const APP_STORE_HOSTS = new Set([
   'setapp.com',
 ])
 
+/**
+ * Hosts where a listing is a person or an account rather than a product.
+ *
+ * A profile is worth listing in its own right: a creator buying rank for their
+ * own handle is the same trade as a company buying it for a landing page.
+ */
+const PROFILE_HOSTS = new Set([
+  'x.com', 'twitter.com', 'linkedin.com', 'instagram.com', 'threads.net',
+  'tiktok.com', 'youtube.com', 'github.com', 'substack.com', 'medium.com',
+])
+
+/**
+ * How many path segments identify one account on a platform.
+ *
+ * One is the usual case: instagram.com/nasa. LinkedIn needs two, because every
+ * profile lives under /in and every company under /company, and keying on the
+ * first segment alone put every person on the site into a single listing that
+ * each new claimant would take from the last.
+ */
+const KEY_DEPTH: Record<string, number> = {
+  'linkedin.com': 2,
+}
+
 /** True when the URL is a store page for an app. */
 export function isAppStoreUrl(u: URL): boolean {
   const host = u.hostname.replace(/^www\./, '')
@@ -50,7 +73,12 @@ export function isAppStoreUrl(u: URL): boolean {
  * in hand, and the submitter can override both.
  */
 export function listingKind(u: URL): ListingKind {
-  return isAppStoreUrl(u) ? 'app' : 'website'
+  if (isAppStoreUrl(u)) return 'app'
+  const host = u.hostname.replace(/^www\./, '')
+  // A bare platform domain is that company's website; a path under it is
+  // somebody's account there.
+  if (PROFILE_HOSTS.has(host) && u.pathname.split('/').filter(Boolean).length) return 'profile'
+  return 'website'
 }
 
 /**
@@ -132,8 +160,8 @@ export function listingKey(u: URL): string {
     if (id) return `play.google.com/${id}`
   }
   if (MULTI_TENANT.has(host)) {
-    const seg = u.pathname.split('/').filter(Boolean)[0]
-    if (seg) return `${host}/${seg.toLowerCase()}`
+    const segs = u.pathname.split('/').filter(Boolean).slice(0, KEY_DEPTH[host] ?? 1)
+    if (segs.length) return `${host}/${segs.join('/').toLowerCase()}`
   }
   return host
 }
@@ -229,12 +257,66 @@ async function fromAppStore(u: URL): Promise<Meta | null> {
  * logo.dev needs a token, and Google's endpoint returns a generic globe with a
  * 200 status on failure, so you cannot tell a miss from a hit.
  */
-/** On X the handle is the product, not whatever x.com serves to a scraper. */
+/**
+ * On a platform the handle is the listing, not whatever the site serves a
+ * scraper. These pages answer a crawler with a login wall or a generic app
+ * name, so the URL is the more reliable source.
+ */
 function handleTitle(u: URL): string | null {
   const host = u.hostname.replace(/^www\./, '')
-  if (host !== 'x.com' && host !== 'twitter.com') return null
-  const seg = u.pathname.split('/').filter(Boolean)[0]
-  return seg ? `@${seg}` : null
+  const segs = u.pathname.split('/').filter(Boolean)
+  if (!segs.length) return null
+  const first = segs[0]
+
+  if (host === 'x.com' || host === 'twitter.com') return `@${first}`
+  if (host === 'instagram.com' || host === 'threads.net') return `@${first}`
+  // TikTok and YouTube already carry the @ in the path.
+  if (host === 'tiktok.com' || host === 'youtube.com') {
+    return first.startsWith('@') ? first : `@${first}`
+  }
+  if (host === 'linkedin.com' && (first === 'in' || first === 'company') && segs[1]) {
+    // A LinkedIn slug is the name with the words hyphenated, and often a
+    // disambiguating suffix that means nothing to a reader.
+    return segs[1]
+      .split('-')
+      .filter((w) => !/^[0-9a-f]{4,}$/i.test(w))
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' ')
+      .slice(0, 60) || null
+  }
+  if (host === 'github.com') return first
+  return null
+}
+
+/**
+ * The page's own title, unless it is the platform's rather than the account's.
+ *
+ * LinkedIn and GitHub put the real name in og:title, which beats anything the
+ * URL can offer. X and Instagram return their own branding, so the handle is
+ * the better answer there.
+ */
+function pickTitle(u: URL, fetched: string, host: string): string {
+  const handle = handleTitle(u)
+  if (!handle) return fetched
+  const generic =
+    !fetched ||
+    fetched === host ||
+    looksLikeWall(fetched) ||
+    /^(x|twitter|instagram|linkedin|tiktok|youtube|threads|github|substack|medium)\b/i.test(fetched)
+  if (generic) return handle
+  // "Anthropic | LinkedIn" is the account's name with the platform's stapled
+  // on. cleanTitle only splits long titles, so short ones keep the suffix.
+  return fetched
+    .replace(
+      /\s*[|\u2013\u2014\u00b7\u2022-]\s*(x|twitter|instagram|linkedin|tiktok|youtube|threads|github|substack|medium)\s*$/i,
+      '',
+    )
+    .trim() || handle
+}
+
+/** Login walls and app names, which is what these hosts serve a crawler. */
+function looksLikeWall(text: string): boolean {
+  return /log ?in|sign ?up|sign ?in|create an account|see posts, photos/i.test(text)
 }
 
 export function faviconUrl(host: string): string {
@@ -296,11 +378,16 @@ export async function fetchMeta(input: string): Promise<Meta | null> {
       decodeEntities(html.match(/<title[^>]*>([^<]+)<\/title>/i)?.[1] ?? '').trim() ||
       host
 
-    const tagline =
-      metaTag(html, 'og:description') || metaTag(html, 'description') || ''
+    let tagline = metaTag(html, 'og:description') || metaTag(html, 'description') || ''
+    // A platform that refused us shows its login copy rather than the account.
+    if (looksLikeWall(tagline)) tagline = ''
 
-    // A store URL is already definitive; otherwise let the page say.
-    const kind = listingKind(u) === 'app' ? 'app' : kindFromHtml(html) ?? 'website'
+    // The URL wins whenever it is definitive. Only a plain website has to ask
+    // the page, and it has to be asked carefully: every social platform ships
+    // App Links tags so phones deep-link into its own mobile app, which read
+    // as "this is an app" and turned every profile into one.
+    const urlKind = listingKind(u)
+    const kind = urlKind !== 'website' ? urlKind : kindFromHtml(html) ?? 'website'
 
     // On a store page og:image is the app's own icon, which is square and
     // exactly what the board wants. Everywhere else it is a wide social card,
@@ -312,7 +399,7 @@ export async function fetchMeta(input: string): Promise<Meta | null> {
       key: listingKey(u),
       kind,
       host,
-      title: handleTitle(u) ?? cleanTitle(title, host),
+      title: pickTitle(u, cleanTitle(title, host), host),
       tagline: tagline.slice(0, 180),
       iconUrl: ogImage ?? faviconUrl(host),
     }

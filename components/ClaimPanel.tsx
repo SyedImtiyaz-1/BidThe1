@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { capture } from '@/lib/analytics'
-import { Plus, Minus, Bolt, Globe, Phone } from './icons'
+import { Plus, Minus, Bolt } from './icons'
 import { PICKABLE_CATEGORIES, MAX_PAYMENT_MINOR } from '@/lib/config'
 import { formatMoney, moneyParts, unitMinor, unitsToBase, unitsToBeat, displayUnits } from '@/lib/money'
 
@@ -52,7 +52,6 @@ export default function ClaimPanel({
 
   const [url, setUrl] = useState('')
   const [category, setCategory] = useState(initialCategory)
-  const [kind, setKind] = useState<'website' | 'app'>('website')
   const [agreed, setAgreed] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -146,7 +145,7 @@ export default function ClaimPanel({
       const res = await fetch('/api/claim', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ url, category, kind, amountMinor: amount }),
+        body: JSON.stringify({ url, category, amountMinor: amount }),
       })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error || 'Could not start the claim.')
@@ -155,7 +154,7 @@ export default function ClaimPanel({
       dialog.current?.showModal()
       // The funnel worth measuring: board seen -> price set -> money taken.
       capture('claim_started', {
-        category, kind, rank_projected: json.rankProjected,
+        category, rank_projected: json.rankProjected,
         amount_minor: json.amountMinor,
       })
     } catch (e) {
@@ -291,20 +290,6 @@ export default function ClaimPanel({
               <option key={c.slug} value={c.slug}>{c.label}</option>
             ))}
           </select>
-          <div className="kind-pick" role="group" aria-label="What are you listing">
-            {(['website', 'app'] as const).map((k) => (
-              <button
-                key={k}
-                type="button"
-                className={kind === k ? 'on' : ''}
-                aria-pressed={kind === k}
-                onClick={() => setKind(k)}
-              >
-                {k === 'website' ? <Globe size={14} /> : <Phone size={14} />}
-                {k === 'website' ? 'Website' : 'App'}
-              </button>
-            ))}
-          </div>
           <button className="btn" onClick={startClaim} disabled={busy}>
             <Bolt /> {busy ? 'Working' : 'Claim rank'}
           </button>

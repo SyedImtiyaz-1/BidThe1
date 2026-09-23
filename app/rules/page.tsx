@@ -66,7 +66,11 @@ export default function Page() {
 
       <h2>What you can list</h2>
       <ul>
-        <li>A product website, an App Store or Play Store listing, or an X @handle.</li>
+        <li>
+          A product website, an App Store or Play Store listing, or a profile: X, LinkedIn,
+          Instagram, Threads, TikTok, YouTube, GitHub or Substack. A handle is worth a rank
+          the same way a product is.
+        </li>
         <li>
           App Store, Play Store, GitHub and similar platform links are keyed by their path, so
           two apps on the same platform never share a listing.
