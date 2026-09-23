@@ -962,6 +962,8 @@ dialog[open] { opacity: 1; transform: none; transition: opacity .16s ease, trans
 .empty .btn { height: 44px; display: inline-flex; align-items: center; padding: 0 22px; font-size: 15px; color: var(--accent-on); }
 
 .row-cat { display: inline-flex; align-items: center; gap: 5px; }
+.kind-badge { display: inline-flex; align-items: center; gap: 5px; }
+.kind-badge svg { color: var(--ink-3); flex: 0 0 auto; }
 .row-cat svg { color: var(--accent-ink); }
 
 /* --- responsive ----------------------------------------------------------- */

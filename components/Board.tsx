@@ -5,6 +5,7 @@ import { unitsToBeat, unitsToBase } from '@/lib/money'
 import { CATEGORIES, MIN_FIRST_PAYMENT_MINOR } from '@/lib/config'
 import ClaimTab from './ClaimTab'
 import CategoryIcon from './CategoryIcon'
+import KindBadge from './KindBadge'
 import { ArrowRight, Sparkle } from './icons'
 
 const CATEGORY_LABEL = new Map<string, string>(CATEGORIES.map((c) => [c.slug, c.label]))
@@ -75,6 +76,8 @@ export default function Board({
                     <CategoryIcon slug={r.category} size={13} />
                     {CATEGORY_LABEL.get(r.category) ?? r.category}
                   </Link>
+                  <span className="sep">·</span>
+                  <KindBadge kind={r.kind} />
                   <span className="sep">·</span>
                   <span>{r.host}</span>
                   <span className="sep">·</span>

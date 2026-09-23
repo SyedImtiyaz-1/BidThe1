@@ -67,7 +67,7 @@ export const CATEGORIES = [
   { slug: 'design', label: 'Design' },
   { slug: 'productivity', label: 'Productivity' },
   { slug: 'finance', label: 'Finance' },
-  { slug: 'apps', label: 'Apps' },
+  { slug: 'people', label: 'People' },
 ] as const
 
 export const PICKABLE_CATEGORIES = CATEGORIES.filter((c) => c.slug !== 'all')

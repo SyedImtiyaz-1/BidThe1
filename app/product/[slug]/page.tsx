@@ -6,6 +6,7 @@ import type React from 'react'
 import Money from '@/components/Money'
 import CopyLink from '@/components/CopyLink'
 import CategoryIcon from '@/components/CategoryIcon'
+import KindBadge from '@/components/KindBadge'
 import { Trophy, Clock, ExternalLink, LinkIcon, Bolt } from '@/components/icons'
 import { getListingDetail as loadDetail } from '@/lib/rank'
 import { formatMoney, unitsToBeat, unitsToBase } from '@/lib/money'
@@ -141,6 +142,8 @@ export default async function Page({ params }: Params) {
           <h1>{l.title}</h1>
           <div className="row-meta">
             <Link href={`/?category=${l.category}`}><CategoryIcon slug={l.category} size={14} /> {cat}</Link>
+            <span className="sep">·</span>
+            <KindBadge kind={l.kind} />
             <span className="sep">·</span>
             <span>{l.host}</span>
             <span className="sep">·</span>

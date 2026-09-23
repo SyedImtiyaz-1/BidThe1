@@ -1,5 +1,5 @@
 import type { ComponentType } from 'react'
-import { Grid, Sparkle, Code, Megaphone, Shapes, ListCheck, Banknote, Phone, Dots } from './icons'
+import { Grid, Sparkle, Code, Megaphone, Shapes, ListCheck, Banknote, Person, Dots } from './icons'
 
 type IconProps = { size?: number; className?: string }
 
@@ -12,7 +12,7 @@ const ICONS: Record<string, ComponentType<IconProps>> = {
   design: Shapes,
   productivity: ListCheck,
   finance: Banknote,
-  apps: Phone,
+  people: Person,
   other: Dots,
 }
 

@@ -9,6 +9,7 @@ export type BoardRow = {
   icon_url: string | null
   host: string
   category: string
+  kind: string
   url: string
   total_minor: number
   today_minor: number
@@ -26,6 +27,7 @@ function shape(r: Record<string, any>): BoardRow {
     icon_url: r.icon_url,
     host: r.host,
     category: r.category,
+    kind: r.kind ?? 'website',
     url: r.url,
     total_minor: num(r.total_minor),
     today_minor: num(r.today_minor),

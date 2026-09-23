@@ -246,3 +246,10 @@ export const Globe = ({ size = 16, className }: P) => (
     <path d="M3.5 10h13M10 3.5c1.8 2 2.7 4.2 2.7 6.5S11.8 14.5 10 16.5C8.2 14.5 7.3 12.3 7.3 10S8.2 5.5 10 3.5Z" />
   </svg>
 )
+
+export const Person = ({ size = 16, className }: P) => (
+  <svg {...base(size)} className={className}>
+    <circle cx="10" cy="7" r="3" />
+    <path d="M4.5 16.5a5.5 5.5 0 0 1 11 0" />
+  </svg>
+)

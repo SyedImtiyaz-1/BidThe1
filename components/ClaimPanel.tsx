@@ -81,6 +81,22 @@ export default function ClaimPanel({
     setTouched(false)
   }, [initialCategory])
 
+  /**
+   * A LinkedIn /in/ URL is a person, and the URL says so with no ambiguity,
+   * so the category answers itself. /company/ does not: a company belongs to
+   * whatever subject it works in, which only the submitter knows.
+   *
+   * Only ever a suggestion into an empty field. Overwriting a choice someone
+   * has already made would be worse than asking.
+   */
+  const [pickedCategory, setPickedCategory] = useState(false)
+  useEffect(() => {
+    if (pickedCategory || category) return
+    if (/^(https?:\/\/)?(www\.)?linkedin\.com\/in\/[^/\s]+/i.test(url.trim())) {
+      setCategory('people')
+    }
+  }, [url, pickedCategory, category])
+
   const amount = unitsToBase(units)
   const parts = moneyParts(amount)
 
@@ -282,7 +298,7 @@ export default function ClaimPanel({
           <select
             className={`select${category ? '' : ' is-empty'}`}
             value={category}
-            onChange={(e) => setCategory(e.target.value)}
+            onChange={(e) => { setPickedCategory(true); setCategory(e.target.value) }}
             aria-label="Category"
           >
             <option value="">Choose a category</option>
