@@ -64,7 +64,7 @@ export const BUSINESS = {
    * remits the tax. Set gstin here if that changes and the imprint will show
    * it; the page already omits the line when it is empty.
    */
-  legalName: 'Syed Imtiyaz Ali',
+  legalName: 'Syed Imtiyaz Ijaz Ali',
   owner: 'ImtiyazSDE',
   address: 'Bhande Plot, Umred Road, Plot No. 50, Nagpur 440024, Maharashtra, India',
   email: `contact@${SITE_DOMAIN}`,
