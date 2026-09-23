@@ -201,12 +201,17 @@ function cleanTitle(raw: string, host: string): string {
 
 function decodeEntities(s: string): string {
   return s
-    .replace(/&amp;/g, '&')
+    // Numeric first, decimal and hex, or a title like htmx's "<&#x2F;> htmx"
+    // comes through with the escape still in it.
+    .replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCodePoint(parseInt(h, 16)))
+    .replace(/&#(\d+);/g, (_, d) => String.fromCodePoint(Number(d)))
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
     .replace(/&quot;/g, '"')
-    .replace(/&#0?39;|&apos;|&#x27;/g, "'")
+    .replace(/&apos;/g, "'")
     .replace(/&nbsp;/g, ' ')
+    // Last, so an escaped ampersand cannot revive the entity beside it.
+    .replace(/&amp;/g, '&')
 }
 
 function metaTag(html: string, prop: string): string | null {
@@ -393,14 +398,16 @@ export async function fetchMeta(input: string): Promise<Meta | null> {
     // exactly what the board wants. Everywhere else it is a wide social card,
     // so the favicon stays the better choice.
     const ogImage = isAppStoreUrl(u) ? metaTag(html, 'og:image') : null
+    const finalTitle = pickTitle(u, cleanTitle(title, host), host)
 
     return {
       url: u.toString(),
       key: listingKey(u),
       kind,
       host,
-      title: pickTitle(u, cleanTitle(title, host), host),
-      tagline: tagline.slice(0, 180),
+      title: finalTitle,
+      // A description that only repeats the name says nothing twice.
+      tagline: tagline.trim().toLowerCase() === finalTitle.toLowerCase() ? '' : tagline.slice(0, 180),
       iconUrl: ogImage ?? faviconUrl(host),
     }
   } catch {
