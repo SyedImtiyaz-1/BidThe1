@@ -26,8 +26,21 @@ export const MIN_FIRST_PAYMENT_MINOR = 100
 /** Ceiling on a single payment, so a typo cannot become a $500,000 charge. */
 export const MAX_PAYMENT_MINOR = 5_000_000
 
-export const SITE_NAME = process.env.NEXT_PUBLIC_SITE_NAME || 'coolapp'
-export const SITE_DOMAIN = `${SITE_NAME}.lol`
+/**
+ * The whole brand, in one place.
+ *
+ * The domain is the source of truth and the name is read out of it, rather
+ * than the name being the source and the suffix hardcoded next to it. The
+ * suffix was written into three separate files, so a rename meant editing
+ * code; now it is one environment variable.
+ */
+export const SITE_DOMAIN = process.env.NEXT_PUBLIC_SITE_DOMAIN || 'bidthe1.com'
+
+/** bidthe1.com -> bidthe1 */
+export const SITE_NAME = SITE_DOMAIN.slice(0, SITE_DOMAIN.lastIndexOf('.')) || SITE_DOMAIN
+
+/** bidthe1.com -> .com, shown in the accent colour beside the name */
+export const SITE_TLD = SITE_DOMAIN.slice(SITE_DOMAIN.lastIndexOf('.'))
 
 /** Absolute origin, needed for canonicals, Open Graph and the sitemap. */
 export const SITE_URL =
@@ -54,8 +67,8 @@ export const BUSINESS = {
   legalName: 'Syed Imtiyaz Ali',
   owner: 'ImtiyazSDE',
   address: 'Bhande Plot, Umred Road, Plot No. 50, Nagpur 440024, Maharashtra, India',
-  email: 'contact@coolapp.lol',
-  x: 'coolappdotlol',
+  email: `contact@${SITE_DOMAIN}`,
+  x: process.env.NEXT_PUBLIC_SITE_X || 'bidthe1',
   gstin: '',
 } as const
 

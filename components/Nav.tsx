@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { SITE_NAME } from '@/lib/config'
+import { SITE_NAME, SITE_TLD } from '@/lib/config'
 import { getStats } from '@/lib/rank'
 import { formatMoney } from '@/lib/money'
 import ThemeToggle from './ThemeToggle'
@@ -27,7 +27,7 @@ export default async function Nav() {
       <div className="wrap nav-in">
         <Link href="/" className="wordmark">
           <Image src="/logo.png" alt="" width={26} height={26} className="mark" priority />
-          {SITE_NAME}<span className="dotlol">.lol</span>
+          {SITE_NAME}<span className="tld">{SITE_TLD}</span>
         </Link>
 
         {/* Counted from real sessions. An invented presence number is false

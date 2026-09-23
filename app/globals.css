@@ -136,7 +136,7 @@ button, input, select { font: inherit; color: inherit; }
   height: 26px;
   display: inline-block;
 }
-.wordmark .dotlol { color: var(--accent); }
+.wordmark .tld { color: var(--accent); }
 
 .pill-stat {
   display: inline-flex;

@@ -1,4 +1,4 @@
-# coolapp.lol
+# bidthe1.com
 
 A paid leaderboard. Anyone pastes a link, pays, and appears at the rank their money buys.
 The only way past someone is to pay more than they did.
@@ -75,7 +75,7 @@ its reported total is in that currency's minor unit rather than in cents.
       audience. The app names no allow-list, so whatever is enabled is what appears.
 - [ ] Webhook endpoint registered at `/api/webhooks/dodo` **on the primary host** with the
       signing secret in `DODO_WEBHOOK_SECRET`. Vercel serves one domain and 308-redirects the
-      others (today `coolapp.lol` redirects to `www.coolapp.lol`), and webhook senders do not
+      others (today `bidthe1.com` redirects to `www.bidthe1.com`), and webhook senders do not
       follow redirects, so an endpoint on the wrong host fails every delivery with a 308 that
       looks like a success in the dashboard. Check with an unsigned POST: the right host
       answers `400`, the wrong one `308`. Subscribe to `payment.succeeded`, the refund events

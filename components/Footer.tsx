@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { SITE_NAME, SITE_DOMAIN, SITE_TAGLINE, BUSINESS } from '@/lib/config'
+import { SITE_NAME, SITE_TLD, SITE_DOMAIN, SITE_TAGLINE, BUSINESS } from '@/lib/config'
 import { Mail, XLogo } from './icons'
 
 const COLS: { title: string; links: [string, string][] }[] = [
@@ -41,7 +41,7 @@ export default function Footer() {
         <div className="foot-brand">
           <Link href="/" className="wordmark">
             <Image src="/logo.png" alt="" width={24} height={24} className="mark" />
-            {SITE_NAME}<span className="dotlol">.lol</span>
+            {SITE_NAME}<span className="tld">{SITE_TLD}</span>
           </Link>
           <p>{SITE_TAGLINE}</p>
           <p className="foot-contact">
