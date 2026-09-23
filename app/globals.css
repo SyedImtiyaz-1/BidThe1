@@ -422,6 +422,20 @@ button, input, select { font: inherit; color: inherit; }
   align-items: start;
 }
 
+/* The rail follows the board down. align-items: start above is what lets it:
+   a stretched grid item fills the row and has nothing to stick within.
+   Only where there are two columns; stacked on a phone it would pin the list
+   over the board. */
+@media (min-width: 961px) {
+  .cols > aside {
+    position: sticky;
+    top: 16px;
+    max-height: calc(100vh - 32px);
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
+}
+
 /* --- product page --------------------------------------------------------- */
 
 .product { padding-top: 18px; }
