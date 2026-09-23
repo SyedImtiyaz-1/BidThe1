@@ -611,10 +611,6 @@ button, input, select { font: inherit; color: inherit; }
 
 /* No hover on a touch screen, so show it only on the top row there rather than
    stacking a badge on every card. */
-@media (hover: none) {
-  .row:first-child .claim-tab { opacity: 1; pointer-events: auto; }
-}
-
 
 .landed {
   margin: 0 0 14px;
@@ -1055,6 +1051,27 @@ dialog[open] { opacity: 1; transform: none; transition: opacity .16s ease, trans
   .foot { padding: 32px 0 28px; }
   .foot-grid { grid-template-columns: 1fr 1fr; }
   .foot-bar { flex-direction: column; gap: 6px; }
+
+  /* Headings sit further from the nav. On a phone the two are inches apart
+     and read as one block unless something separates them. */
+  .cat-head { margin-top: 26px; }
+  .days .day-block:first-of-type { padding-top: 20px; }
+  .prose { padding-top: 34px; }
+
+  /* Lighter. 800 at this size is shouting, and a phone screen is close to
+     the eye in a way a monitor is not. */
+  .head-line { font-weight: 720; letter-spacing: -.022em; }
+  .row-title { font-weight: 640; }
+  .money { font-weight: 660; }
+  .cat-head h1, .prose h1 { font-weight: 720; }
+
+  /* Shorter rows. One line of description, one line of meta, no wrapping to
+     a third. The host repeats what the title already says, so it goes. */
+  .row { padding: 11px 12px; }
+  .row-tag { -webkit-line-clamp: 1; margin: 1px 0 3px; }
+  .row-meta { gap: 4px 7px; font-size: 12.5px; }
+  .row-meta .host-cell, .row-meta .host-cell + .sep { display: none; }
+  .row-head { gap: 2px 10px; }
 }
 
 /* Small phones */

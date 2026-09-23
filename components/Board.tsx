@@ -79,7 +79,7 @@ export default function Board({
                   <span className="sep">·</span>
                   <KindBadge kind={r.kind} />
                   <span className="sep">·</span>
-                  <span>{r.host}</span>
+                  <span className="host-cell">{r.host}</span>
                   <span className="sep">·</span>
                   <span className="num">{r.click_count.toLocaleString('en-US')} clicks</span>
                   <span className="sep">·</span>
