@@ -894,11 +894,37 @@ dialog[open] { opacity: 1; transform: none; transition: opacity .16s ease, trans
   animation-duration: 420ms;
   animation-timing-function: cubic-bezier(.22, 1, .36, 1);
 }
+
+/* --- theme wipe ----------------------------------------------------------- */
+
+/* The incoming theme is revealed from the top down, over a still copy of the
+   old one. Only the new snapshot moves: animating both makes the midpoint go
+   translucent and the text underneath show through. */
+:root[data-theme-switch]::view-transition-old(root) {
+  animation: none;
+  z-index: 0;
+}
+:root[data-theme-switch]::view-transition-new(root) {
+  animation: theme-wipe 560ms cubic-bezier(.65, 0, .35, 1);
+  z-index: 1;
+}
+@keyframes theme-wipe {
+  from { clip-path: inset(0 0 100% 0); }
+  to   { clip-path: inset(0 0 0 0); }
+}
+
+/* Rows opt out for the duration, or each one is snapshotted separately and
+   cross-fades on its own while the page behind it wipes. */
+:root[data-theme-switch] .row,
+:root[data-theme-switch] .hero {
+  view-transition-name: none !important;
+}
 @keyframes land { from { background: var(--accent-wash-2); } to { background: var(--paper-2); } }
 .row.just-claimed { animation: land 620ms cubic-bezier(.22, 1, .36, 1); }
 
 @media (prefers-reduced-motion: reduce) {
   *, ::view-transition-group(*) { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+  :root[data-theme-switch]::view-transition-new(root) { animation: none; }
   .dot { animation: none; }
 }
 
