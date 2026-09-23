@@ -537,3 +537,60 @@ export async function getLiveSlugs(limit = 5000): Promise<{ slug: string; update
   )
   return rows.map((r) => ({ slug: r.slug, updated: new Date(r.updated).toISOString() }))
 }
+
+export type DailyBoard = Day & { rows: BoardRow[] }
+
+/**
+ * Every day with the listings that ranked on it, in one query.
+ *
+ * The alternative is a summary query and then one board query per day, which
+ * is sixty round trips to render a page that is mostly headings. A window
+ * partitioned by day does the same work once.
+ */
+export async function getDailyBoards(days = 30, perDay = 3): Promise<DailyBoard[]> {
+  const rows = await q<Record<string, any>>(
+    `with spend as (
+       select p.listing_id,
+              (p.created_at at time zone 'utc')::date as day,
+              sum(p.amount_minor) as day_minor,
+              min(p.created_at)   as first_at,
+              count(*)::int       as payments
+         from payments p
+        where p.status = 'confirmed'
+        group by 1, 2
+     ),
+     ranked as (
+       select s.day, s.day_minor, s.first_at, s.payments, l.*,
+              row_number() over (partition by s.day
+                                 order by s.day_minor desc, s.first_at asc) as rank,
+              count(*)     over (partition by s.day)                        as day_listings,
+              sum(s.day_minor) over (partition by s.day)                    as day_total,
+              sum(s.payments)  over (partition by s.day)                    as day_payments
+         from spend s
+         join listings l on l.id = s.listing_id
+        where l.status = 'live'
+     )
+     select * from ranked
+      where rank <= $1
+      order by day desc, rank asc`,
+    [perDay],
+  )
+
+  const out = new Map<string, DailyBoard>()
+  for (const r of rows) {
+    const day = typeof r.day === 'string' ? r.day.slice(0, 10) : new Date(r.day).toISOString().slice(0, 10)
+    let entry = out.get(day)
+    if (!entry) {
+      entry = {
+        day,
+        totalMinor: num(r.day_total),
+        listings: num(r.day_listings),
+        payments: num(r.day_payments),
+        rows: [],
+      }
+      out.set(day, entry)
+    }
+    entry.rows.push(shape({ ...r, today_minor: r.day_minor }))
+  }
+  return [...out.values()].slice(0, days)
+}
