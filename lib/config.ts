@@ -68,7 +68,7 @@ export const BUSINESS = {
   owner: 'ImtiyazSDE',
   address: 'Bhande Plot, Umred Road, Plot No. 50, Nagpur 440024, Maharashtra, India',
   email: `contact@${SITE_DOMAIN}`,
-  x: process.env.NEXT_PUBLIC_SITE_X || 'bidthe1',
+  x: process.env.NEXT_PUBLIC_SITE_X || 'bidthe1dotcom',
   gstin: '',
 } as const
 
