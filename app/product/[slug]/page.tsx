@@ -118,7 +118,7 @@ export default async function Page({ params }: Params) {
         </>
       ) : (
         <>
-          <span className="stand-v stand-none">—</span>
+          <span className="stand-v stand-none">None</span>
           <span className="stand-of">not on this board</span>
         </>
       )}

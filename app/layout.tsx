@@ -42,7 +42,7 @@ export const metadata: Metadata = {
   // Everything relative below resolves against this, including the OG image.
   metadataBase: new URL(SITE_URL),
   title: {
-    default: `${SITE_DOMAIN} — ${SITE_TAGLINE}`,
+    default: `${SITE_DOMAIN} · ${SITE_TAGLINE}`,
     template: `%s · ${SITE_DOMAIN}`,
   },
   description: DESCRIPTION,
@@ -57,14 +57,14 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     siteName: SITE_DOMAIN,
-    title: `${SITE_DOMAIN} — ${SITE_TAGLINE}`,
+    title: `${SITE_DOMAIN} · ${SITE_TAGLINE}`,
     description: DESCRIPTION,
     url: '/',
     locale: 'en_US',
   },
   twitter: {
     card: 'summary_large_image',
-    title: `${SITE_DOMAIN} — ${SITE_TAGLINE}`,
+    title: `${SITE_DOMAIN} · ${SITE_TAGLINE}`,
     description: DESCRIPTION,
     creator: `@${BUSINESS.x}`,
     site: `@${BUSINESS.x}`,

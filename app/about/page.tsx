@@ -28,7 +28,7 @@ export default async function Page() {
     [money(stats.totalMinor), 'paid in total'],
     [stats.visitorsToday.toLocaleString('en-US'), 'visitors today'],
     [num(extra?.clicks).toLocaleString('en-US'), 'clicks delivered'],
-    [leader ? money(leader.total_minor) : '—', 'highest rank so far', leader?.title],
+    [leader ? money(leader.total_minor) : 'None yet', 'highest rank so far', leader?.title],
     [stats.listings.toLocaleString('en-US'), 'listed products'],
     [num(extra?.new_today).toLocaleString('en-US'), 'products added today'],
     [money(num(extra?.today_minor)), 'paid today'],

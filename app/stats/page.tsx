@@ -21,7 +21,7 @@ export default async function Page() {
     ['Paid in total', formatMoney(stats.totalMinor)],
     ['Payments taken', num(extra?.payments).toLocaleString('en-US')],
     ['Clicks delivered', clicks.toLocaleString('en-US')],
-    ['Average per click', perClick > 0 ? formatMoney(perClick, { decimals: true }) : '—'],
+    ['Average per click', perClick > 0 ? formatMoney(perClick, { decimals: true }) : 'None yet'],
     ['Online now', stats.online.toLocaleString('en-US')],
     ['Visitors today', stats.visitorsToday.toLocaleString('en-US')],
   ]
