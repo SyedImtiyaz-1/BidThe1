@@ -38,7 +38,8 @@ export default function Page() {
       <p>
         Our payment processor, which acts as merchant of record and needs your billing details to
         charge you and to handle tax. Our database and hosting providers, which store the data
-        above on our behalf. PostHog, which runs the product analytics described above.
+        above on our behalf. PostHog and Google Analytics, which run the product analytics
+        described above.
         Nobody else, and we do not sell anything to anyone.
       </p>
 

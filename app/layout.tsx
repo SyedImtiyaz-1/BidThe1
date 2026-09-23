@@ -3,6 +3,8 @@ import Script from 'next/script'
 import { Suspense } from 'react'
 import Analytics from '@/components/Analytics'
 import { Poppins } from 'next/font/google'
+
+const GA_ID = process.env.NEXT_PUBLIC_GA_ID
 import { cookies } from 'next/headers'
 import './globals.css'
 import Nav from '@/components/Nav'
@@ -135,6 +137,22 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         {/* useSearchParams needs a boundary or the whole page opts out of
             static rendering. */}
         <Suspense fallback={null}><Analytics /></Suspense>
+        {/* Google Analytics. afterInteractive rather than lazyOnload: gtag has
+            to be in place early enough to attribute the landing page, which is
+            the one pageview that says where a visitor came from. Nothing loads
+            without the measurement id. */}
+        {GA_ID && (
+          <>
+            <Script
+              src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
+              strategy="afterInteractive"
+            />
+            <Script id="ga-init" strategy="afterInteractive">
+              {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','${GA_ID}');`}
+            </Script>
+          </>
+        )}
+
         {/* The AskMySite chat bubble. lazyOnload: it fetches after the page is
             idle, so a third-party script never sits between a visitor and the
             board, which is what the speed work was for. */}
