@@ -15,8 +15,8 @@
   --ink-2:        oklch(.450 .012 60);
   --ink-3:        oklch(.600 .012 60);
 
-  --accent:        oklch(.630 .219 35);
-  --accent-strong: oklch(.575 .215 35);
+  --accent:        oklch(.655 .210 36);
+  --accent-strong: oklch(.600 .212 35);
   --accent-ink:    oklch(.505 .190 35);
   --accent-on:     oklch(.995 .005 70);
   --accent-wash:   oklch(.965 .022 45);
