@@ -643,6 +643,12 @@ button, input, select { font: inherit; color: inherit; }
 /* --- today rail ----------------------------------------------------------- */
 
 .rail-head { display: flex; align-items: center; justify-content: space-between; padding: 0 0 10px; }
+.rail-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex: 0 0 auto;
+}
 .rail-title { font-size: 15px; font-weight: 700; letter-spacing: -.015em; display: flex; align-items: center; gap: 9px; }
 .rail-link { font-size: 13px; color: var(--accent-ink); font-weight: 500; }
 .rail-empty { color: var(--ink-2); font-size: 15px; margin: 0; }

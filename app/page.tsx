@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import ClaimPanel from '@/components/ClaimPanel'
-import TodayRail from '@/components/TodayRail'
+import SideRail from '@/components/SideRail'
 import Board from '@/components/Board'
 import { Trophy, GridPlus, Clock } from '@/components/icons'
 import CategoryIcon from '@/components/CategoryIcon'
@@ -163,7 +163,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<Sea
           )}
         </div>
 
-        <TodayRail />
+        <SideRail boardScope={scope} />
       </div>
     </div>
   )
